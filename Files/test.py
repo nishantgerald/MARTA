@@ -9,7 +9,7 @@ app = Flask(__name__, template_folder='template')
 
 @app.route('/')
 def index():
-    return render_template('/login.html')
+    return render_template('/s01_login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -46,7 +46,20 @@ def login():
         finally:
             connection.close()
     elif "register" in request.form:
-        return render_template('success.html')
+        return render_template('s02_registerNavigation.html')
+
+@app.route('/register_navigation', methods=['GET', 'POST'])
+def register_navigation():
+    if "user_only" in request.form:
+        return render_template('s03_registerUserOnly.html')
+    elif "visitor_only" in request.form:
+        return render.template('s04_registerVisitorOnly.html')
+    elif "employee_only" in request.form:
+        return render.template('s05_registerEmployeeOnly.html')
+    elif "employee_visitor" in request.form:
+        return render.template('s06_registerEmployeeVisitor.html')
+    elif "back" in request.form:
+        return render.template('s01_login.html')    
 
 if __name__ == '__main__':
     app.run(debug=True)
