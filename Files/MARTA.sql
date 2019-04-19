@@ -139,7 +139,7 @@ CREATE PROCEDURE s33_explore_event(IN
   THEN event.Description LIKE '%'
   ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
   AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
-  AND EventPrice BETWEEN PrangeL AND PrangeU
+  AND EventPrice BETWEEN PrangeL AND PrangeU);
  END //
 DELIMITER ;
 
