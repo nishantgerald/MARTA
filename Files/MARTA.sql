@@ -19,6 +19,17 @@ BEGIN
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE s01_employee_check_type(IN
+  EMailID VARCHAR(50),
+  Pass VARCHAR(25))
+BEGIN
+	SELECT EmployeeType
+    FROM employee
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
+ END //
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE s03_register_user(IN
   UName VARCHAR(50),
   Pass VARCHAR(25),
@@ -139,7 +150,7 @@ CREATE PROCEDURE s33_explore_event(IN
   THEN event.Description LIKE '%'
   ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
   AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
-  AND EventPrice BETWEEN PrangeL AND PrangeU
+  AND EventPrice BETWEEN PrangeL AND PrangeU);
  END //
 DELIMITER ;
 
