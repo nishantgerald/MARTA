@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register Navigation</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <style type="text/css">
+        body{ font: 14px sans-serif; }
+        .wrapper{ width: 350px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Register Navigation</h2>
+        <form action="{ url_for('register_navigation') }}" method="POST">
+            <div class="form-group">
+                <p><input type="submit" class="btn btn-primary" value="User Only" name="user_only" /></p>
+                <p><input type="submit" class="btn btn-primary" value="Visitor Only" name="visitor_only" /></p>
+                <p><input type="submit" class="btn btn-primary" value="Employee Only" name="employee_only" /></p>
+                <p><input type="submit" class="btn btn-primary" value="Employee-Visitor" name="employee_visitor" /></p>
+                <p><input type="submit" class="btn btn-primary" value="Back" name="back" /></p>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
