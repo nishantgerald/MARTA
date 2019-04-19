@@ -20,12 +20,11 @@ DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50),
-  Pass VARCHAR(25))
+  EMailID VARCHAR(50)
 BEGIN
 	SELECT EmployeeType
     FROM employee
-    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID);
  END //
 DELIMITER ;
 
@@ -183,12 +182,19 @@ DELIMITER ;
 
 /* page 15 - Explore transit if choice is NOT 'ALL' */
 DELIMITER //
-CREATE PROCEDURE s15_get_route(IN TType VARCHAR(50), Site VARCHAR(50), TPriceMin DECIMAL(7,2), TPriceMax DECIMAL(7,2))
+CREATE PROCEDURE s15_get_route(IN
+  TType VARCHAR(50),
+  Site VARCHAR(50),
+  TPriceMin DECIMAL(7,2),
+  TPriceMax DECIMAL(7,2))
 BEGIN
-SELECT DISTINCT connect.TransitType as Type,connect.TransitRoute as Route, transit.TransitPrice as Price, count(*) as No_of_Connected_Sites
+SELECT connect.TransitType as Type,connect.TransitRoute as Route, transit.TransitPrice as Price, count(*) as No_of_Connected_Sites
 FROM transit
 INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
-WHERE transit.TransitType = TType AND transit.TransitPrice >= TPriceMin AND transit.TransitPrice <= TPriceMax and connect.SiteName = Site;
+GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitType,transit.TransitRoute) IN (
+  SELECT CONCAT(transit.TransitType,transit.TransitRoute)
+
+)
 END //
 DELIMITER ;
 
