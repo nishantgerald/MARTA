@@ -19,6 +19,17 @@ BEGIN
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE s01_employee_check_type(IN
+  EMailID VARCHAR(50),
+  Pass VARCHAR(25))
+BEGIN
+	SELECT EmployeeType
+    FROM employee
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
+ END //
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE s03_register_user(IN
   UName VARCHAR(50),
   Pass VARCHAR(25),
