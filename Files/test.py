@@ -4,6 +4,13 @@ import json
 
 from flask import Flask
 app = Flask(__name__, template_folder='template')
+# Connect to the database
+connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='root',
+                             db='Beltline',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
 def index():
@@ -11,28 +18,25 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Connect to the database
-    connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='root',
-                             db='Beltline',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
-    print("yay!")
-
-    """username_form = request.form["username"]
+    
+    username = request.form['username']
+    password = request.form['password']
 
     try:
         with open('MARTA.sql', 'r') as sql:
             procs = sql.read().split(';')
             with connection.cursor() as cursor:
+                #EVERYTHING UNTIL THIS POINT WORKS
              # Read a single record
-                result = cursor.execute(s01_user_login_check_email, [username_form])
-                return json.dumps(result)
+                result = cursor.callproc('s01_user_login_check_email', (username, '@present'))
+                return result
+                
+
     except:
-        print("ERROR")
-    finally:"""
-    connection.close()
+        return "ERROR"
+        
+    finally:
+        connection.close()
 
 if __name__ == '__main__':
     app.run(debug=True)
