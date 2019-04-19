@@ -29,11 +29,11 @@ def login():
                 
              # Read a single record
                 result = cursor.execute("SELECT Username FROM emails WHERE Email = %s;", [username])
-                user = cursor.fetchone()
+                user_result = cursor.fetchone()
                 #EVERYTHING UNTIL THIS POINT WORKS-----------------
-            if user:
+            if user_result:
                 with connection.cursor() as cursor2:
-                    pass_result = cursor.execute("SELECT Username FROM emails WHERE Email = %s) AND Password = %s;", [username, password])
+                    pass_result = cursor.execute("SELECT UserType FROM user WHERE Username in SELECT Username FROM emails WHERE Email = %s) AND Password = %s;", [username, password])
                     return json.dumps(cursor.fetchone())
             else:
                 return "ERROR: Invalid Username"
