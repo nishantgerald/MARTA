@@ -28,8 +28,8 @@ def login():
             with connection.cursor() as cursor:
                 #EVERYTHING UNTIL THIS POINT WORKS-----------------
              # Read a single record
-                result = cursor.execute("SELECT * FROM user")
-                return json.dumps(result)
+                result = cursor.execute("SELECT Username FROM emails WHERE Email = %s;", [username])
+                return json.dumps(cursor.fetchone())
                 
 
     except:
