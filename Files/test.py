@@ -27,21 +27,21 @@ def login():
             with open('MARTA.sql', 'r') as sql:
                 procs = sql.read().split(';')
                 with connection.cursor() as cursor:
-                    
-                 # Read a single record
-                    result = cursor.execute("SELECT Username FROM emails WHERE Email = %s;", [username])
-                    user_result = cursor.fetchone()
-                    return json.dumps(user_result)
-                    #EVERYTHING UNTIL THIS POINT WORKS-----------------
-                #if user_result:
-                #    with connection.cursor() as cursor2:
-                #        pass_result = cursor.execute("SELECT UserType FROM user WHERE Username in SELECT Username FROM emails WHERE Email = %s) AND Password = %s;", [username, password])
-                #        return json.dumps(cursor.fetchone())
-                #else:
-                #    return "ERROR: Invalid Username"
 
-        except:
-            return "ERROR"
+                # Read a single record
+                    cursor.callproc('s01_user_login_check_email', [username])
+                    user_result = str(json.dumps(cursor.fetchone()))[-2]
+                    #EVERYTHING UNTIL THIS POINT WORKS-----------------
+                if user_result == '1':
+                    with connection.cursor() as cursor2:
+                        pass_result = cursor2.callproc('s01_user_login_check_password', [username, password])
+                        return json.dumps(cursor2.fetchone())
+                else:
+                    return "ERROR: Invalid Username"
+
+        except Exception as e:
+            print(e)
+            return str(e)
             
         finally:
             connection.close()
@@ -53,13 +53,13 @@ def register_navigation():
     if "user_only" in request.form:
         return render_template('s03_registerUserOnly.html')
     elif "visitor_only" in request.form:
-        return render.template('s04_registerVisitorOnly.html')
+        return render_template('s04_registerVisitorOnly.html')
     elif "employee_only" in request.form:
-        return render.template('s05_registerEmployeeOnly.html')
+        return render_template('s05_registerEmployeeOnly.html')
     elif "employee_visitor" in request.form:
-        return render.template('s06_registerEmployeeVisitor.html')
+        return render_template('s06_registerEmployeeVisitor.html')
     elif "back" in request.form:
-        return render.template('s01_login.html')    
+        return render_template('s01_login.html')    
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,21 +1,20 @@
+use Beltline;
 DELIMITER //
 CREATE PROCEDURE s01_user_login_check_email(IN
-  EMailID VARCHAR(50),
-  OUT present BOOL)
- BEGIN
+  EMailID VARCHAR(50))
+BEGIN
 	SELECT EXISTS (SELECT Username FROM emails WHERE Email = EMailID);
  END //
-DELIMITER ;
+DELIMITER ;s01_user_login_check_email
 
 DELIMITER //
 CREATE PROCEDURE s01_user_login_check_password(IN
   EMailID VARCHAR(50),
-  Pass VARCHAR(25),
-  OUT present BOOL)
- BEGIN
-	SELECT EXISTS (SELECT *
+  Pass VARCHAR(25))
+BEGIN
+	SELECT UserType
     FROM user
-    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass);
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
  END //
 DELIMITER ;
 
@@ -64,17 +63,26 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s31_view_schedule(IN
   EName VARCHAR(50),
+  SName VARCHAR(50),
   Keyword VARCHAR(50),
   SDate DATE,
   EDate DATE)
  BEGIN
- SELECT EventName, SiteName, StartDate, EndDate, Count(*) as StaffCount
- FROM event
- WHERE EventName = EName AND StartDate >= SDate AND EndDate <= EDate AND EventName in (
-   SELECT EventName
-FROM event
-WHERE event.Description LIKE CONCAT ('%', @Keyword, '%'))
- GROUP BY  EventName, SiteName, StartDate, EndDate;
+ SELECT staff_assignment.EventName, staff_assignment.SiteName, staff_assignment.StartDate, event.EndDate, Count(*) as StaffCount
+ FROM staff_assignment
+ INNER JOIN event ON staff_assignment.EventName = event.EventName AND staff_assignment.SiteName = event.SiteName AND staff_assignment.StartDate = event.StartDate
+ WHERE
+  CASE WHEN EName IS NULL
+  THEN event.EventName = event.EventName
+  ELSE event.EventName = EName END
+  AND CASE WHEN SName IS NULL
+  THEN event.SiteName = event.SiteName
+  ELSE event.SiteName = SName END
+  AND CASE WHEN Keyword IS NULL
+  THEN event.Description LIKE '%'
+  ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
+  AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
+ GROUP BY  staff_assignment.EventName, staff_assignment.SiteName, staff_assignment.StartDate, event.EndDate;
  END //
 DELIMITER ;
 
@@ -120,10 +128,18 @@ CREATE PROCEDURE s33_explore_event(IN
  GROUP BY visitevent.EventName, visitevent.SiteName, visitevent.StartDate HAVING count(*) BETWEEN VrangeL AND VrangeU and CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate) IN (
  SELECT CONCAT(event.EventName,event.SiteName, event.StartDate)
  FROM event
- WHERE event.EventName = EName AND event.SiteName = SName AND event.StartDate >= SDate AND event.EndDate <= EDate AND EventPrice BETWEEN PrangeL AND PrangeU AND event.EventName in (
-   SELECT event.EventName
-   FROM event
-   WHERE event.Description LIKE CONCAT ('%',@Keyword, '%')));
+ WHERE
+ CASE WHEN EName IS NULL
+  THEN event.EventName = event.EventName
+  ELSE event.EventName = EName END
+  AND CASE WHEN SName IS NULL
+  THEN event.SiteName = event.SiteName
+  ELSE event.SiteName = SName END
+  AND CASE WHEN Keyword IS NULL
+  THEN event.Description LIKE '%'
+  ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
+  AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
+  AND EventPrice BETWEEN PrangeL AND PrangeU
  END //
 DELIMITER ;
 
