@@ -248,3 +248,21 @@ WHERE site.SiteName = old_name;
 
 END //
 DELIMITER ;
+
+/* Page 27 - Create Event */
+DELIMITER //
+CREATE PROCEDURE 27_staff_avail(IN SDate date) 
+SELECT StaffUsername FROM staff_assignment
+WHERE SDate <> StartDate;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE 27_mgr_create_event(IN Name VARCHAR(50), SDate date, EDate date, 
+Price DECIMAL(7,2), ECapacity INT(11), MinStaff INT(11), EDescr VARCHAR(1000), 
+SName VARCHAR(50))
+BEGIN 
+INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffRequired, Description, SiteName) 
+VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
+END //
+DELIMITER ;
