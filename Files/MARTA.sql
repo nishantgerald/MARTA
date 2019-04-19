@@ -19,13 +19,12 @@ BEGIN
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50),
-  Pass VARCHAR(25))
+CREATE PROs01_user_login_check_passwordCEDURE s01_employee_check_type(IN
+  EMailID VARCHAR(50))
 BEGIN
 	SELECT EmployeeType
     FROM employee
-    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID);
  END //
 DELIMITER ;
 
