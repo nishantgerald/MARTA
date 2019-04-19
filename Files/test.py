@@ -26,11 +26,17 @@ def login():
         with open('MARTA.sql', 'r') as sql:
             procs = sql.read().split(';')
             with connection.cursor() as cursor:
-                #EVERYTHING UNTIL THIS POINT WORKS-----------------
+                
              # Read a single record
                 result = cursor.execute("SELECT Username FROM emails WHERE Email = %s;", [username])
-                return json.dumps(cursor.fetchone())
-                
+                user = cursor.fetchone()
+                #EVERYTHING UNTIL THIS POINT WORKS-----------------
+            if user:
+                with connection.cursor() as cursor2:
+                    pass_result = cursor.execute("SELECT Username FROM emails WHERE Email = %s) AND Password = %s;", [username, password])
+                    return json.dumps(cursor.fetchone())
+            else:
+                return "ERROR: Invalid Username"
 
     except:
         return "ERROR"
