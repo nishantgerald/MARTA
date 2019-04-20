@@ -19,13 +19,10 @@ BEGIN
 DELIMITER ;
 
 DELIMITER //
-<<<<<<< HEAD
-CREATE PROs01_user_login_check_passwordCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50))
-=======
 CREATE PROCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50)
->>>>>>> da4a5046851a4aa8ec739ae8f1fcf686042bea77
+  EMailID VARCHAR(50))
+CREATE PROCEDURE s01_employee_check_type(IN
+  EMailID VARCHAR(50))
 BEGIN
 	SELECT EmployeeType
     FROM employee
@@ -197,9 +194,7 @@ SELECT connect.TransitType as Type,connect.TransitRoute as Route, transit.Transi
 FROM transit
 INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
 GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitType,transit.TransitRoute) IN (
-  SELECT CONCAT(transit.TransitType,transit.TransitRoute)
-
-)
+  SELECT CONCAT(transit.TransitType,transit.TransitRoute));
 END //
 DELIMITER ;
 
