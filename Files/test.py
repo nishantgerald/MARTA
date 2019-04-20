@@ -9,6 +9,7 @@ user_email = ""
 user_type = ""
 employee_type = ""
 username = ""
+employee_info = []
 # Connect to the database
 connection = pymysql.connect(host='localhost',
                              user='root',
@@ -149,13 +150,20 @@ def register_employee():
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
         firstname = request.form['FirstName']
         lastname = request.form['LastName']
-        values = [username, password, 'Pending', firstname, lastname, 'Employee']
-        query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
+        phone = request.forn['phone']
+        address = request.form['address']
+        city = request.form['city']
+        state = request.form['state']
+        zipcode = request.form['zipcode']
+        etype = request.form['EmployeeType']
+        user_values = [username, password, 'Pending', firstname, lastname, 'Employee']
+        user_query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
+        employee_info = [username, 'EID', phone, address, city, state, zipcode, etype]
         with connection.cursor() as cursor:
-            cursor.execute(query, values)
+            cursor.execute(user_query, values)
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
-
+            
             return "Thank you for registering! You will be able to login once your account is approved."
 
     elif "back" in request.form:
