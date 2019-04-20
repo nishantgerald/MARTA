@@ -179,62 +179,145 @@ CREATE PROCEDURE s34_log_event_visit(IN
  END //
 DELIMITER ;
 
-
-/* page 15 - Explore transit if choice is NOT 'ALL' */
+/* Page 16 - Take Transit*/
 DELIMITER //
 CREATE PROCEDURE s15_get_route(IN
   TType VARCHAR(50),
   Site VARCHAR(50),
-  TPriceMin DECIMAL(7,2),
-  TPriceMax DECIMAL(7,2))
+  PrangeL DECIMAL(7,2),
+  PrangeU DECIMAL(7,2))
 BEGIN
 SELECT connect.TransitType as Type,connect.TransitRoute as Route, transit.TransitPrice as Price, count(*) as No_of_Connected_Sites
 FROM transit
-INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
+JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
 GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitType,transit.TransitRoute) IN (
-  SELECT CONCAT(transit.TransitType,transit.TransitRoute)
-
-)
+  SELECT DISTINCT CONCAT(transit.TransitType,transit.TransitRoute)
+  FROM transit
+  JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
+  WHERE
+  CASE WHEN TType IS NULL
+   THEN transit.TransitType=transit.TransitType
+   ELSE transit.TransitType = TType END
+   AND CASE WHEN Site IS NULL
+   THEN connect.SiteName = connect.SiteName
+   ELSE connect.SiteName = Site END
+   AND transit.TransitPrice BETWEEN PrangeL AND PrangeU);
 END //
 DELIMITER ;
+
 
 /* Page 16 - Transit History*/
-CREATE PROCEDURE s16_transit_history(IN TType VARCHAR(50), Site VARCHAR(50), Route VARCHAR(20), StartDate DATE, EndDate DATE)
+DELIMITER //
+CREATE PROCEDURE s16_transit_history(IN
+  TType VARCHAR(50),
+  Site VARCHAR(50),
+  Route VARCHAR(20),
+  StartDate DATE,
+  EndDate DATE)
 BEGIN
-SELECT DISTINCT take.TransitDate as Date,take.TransitType as Type,take.TransitRoute as Route, transit.TransitPrice as Price
+
+DROP VIEW IF EXISTS transit_connections;
+
+CREATE VIEW transit_connections AS
+SELECT transit.TransitType, transit.TransitRoute, transit.TransitPrice, connect.SiteName
 FROM transit
-INNER JOIN take ON transit.TransitType=take.TransitType AND transit.TransitRoute=take.TransitRoute
-INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
-WHERE transit.TransitType = TType AND take.TransitDate>=StartDate AND take.TransitDate<=EndDate AND connect.SiteName = Site;
+JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute;
+
+SELECT DISTINCT take.TransitDate as Date,take.TransitType as Type,take.TransitRoute as Route, transit_connections.TransitPrice as Price
+FROM take
+INNER JOIN transit_connections ON transit_connections.TransitType=take.TransitType AND transit_connections.TransitRoute=take.TransitRoute
+WHERE
+CASE WHEN TType IS NULL
+ THEN transit_connections.TransitType=transit_connections.TransitType
+ ELSE transit_connections.TransitType = TType END
+ AND CASE WHEN Site IS NULL
+ THEN transit_connections.SiteName = transit_connections.SiteName
+ ELSE transit_connections.SiteName = Site END
+  AND CASE WHEN Route IS NULL
+ THEN transit_connections.TransitRoute = transit_connections.TransitRoute
+ ELSE transit_connections.TransitRoute = Route END
+ AND take.TransitDate BETWEEN StartDate AND EndDate;
 END //
 DELIMITER ;
+
+/* page 17 - Employee Manage Profile */
+
 
 /* Page 18 - Manage User*/
 DELIMITER //
-CREATE PROCEDURE s18_manage_user(IN username VARCHAR(50), type ENUM('User','Visitor','Employee','Employee, Visitor'), status ENUM('Approved','Declined','Pending'))
+CREATE PROCEDURE s18_manage_user(IN
+  username VARCHAR(50),
+  type ENUM('User','Visitor','Employee','Employee, Visitor'),
+  status ENUM('Approved','Declined','Pending'))
 BEGIN
 SELECT DISTINCT user.Username as username,user.UserType as type, user.Status as status, count(*) as email_count
 FROM user
 INNER JOIN emails ON emails.Username=user.Username
-WHERE emails.Username = username AND user.UserType = type AND user.Status = status
-GROUP BY emails.Username;
+GROUP BY emails.Username, user.UserType HAVING CONCAT(user.Username,user.UserType) IN (
+  SELECT CONCAT(user.Username,user.UserType)
+  FROM user
+  WHERE
+   CASE WHEN type IS NULL
+   THEN user.UserType = user.UserType
+   ELSE user.UserType = type END
+   AND CASE WHEN username IS NULL
+   THEN user.Username = user.Username
+   ELSE user.Username = username END
+	AND CASE WHEN status IS NULL
+   THEN user.Status = user.Status
+   ELSE user.Status = status END);
 END //
+DELIMITER ;
+
+/* Page 18 - Update User Status */
+DELIMITER //
+CREATE PROCEDURE s18_user_status_update(IN
+  UName VARCHAR(50),
+  UStat ENUM('Approved','Declined'))
+BEGIN
+	UPDATE user
+  SET Status = UStat
+  WHERE Username = UName;
+ END //
 DELIMITER ;
 
 /* Page 19 - Manage Site*/
 DELIMITER //
-CREATE PROCEDURE s19_manage_site(IN sitename VARCHAR(50), fname VARCHAR(50), lname VARCHAR(50), open_everyday ENUM('Yes','No'))
+CREATE PROCEDURE s19_manage_site(IN
+  sitename VARCHAR(50),
+  fname VARCHAR(50),
+  lname VARCHAR(50),
+  open_everyday ENUM('Yes','No'))
 BEGIN
-SELECT site.SiteName as Name,CONCAT(fname,' ',lname) as Manager,site.OpenEveryday
+SELECT site.SiteName as Name,CONCAT(user.Firstname,' ',user.Lastname) as Manager,site.OpenEveryday
 FROM site
 INNER JOIN user ON user.Username=site.ManagerUsername
-WHERE user.FirstName= fname AND user.LastName = lname AND user.UserType IN ('Employee','Employee, Visitor');
+WHERE
+  CASE WHEN sitename IS NULL
+  THEN site.SiteName = site.SiteName
+  ELSE site.SiteName = sitename END
+  AND CASE WHEN fname IS NULL
+  THEN user.Firstname = user.Firstname
+  ELSE user.Firstname = fname END
+  AND CASE WHEN lname IS NULL
+  THEN user.Lastname = user.Lastname
+  ELSE user.Lastname = lname END
+  AND CASE WHEN open_everyday IS NULL
+  THEN site.OpenEveryday = site.OpenEveryday
+  ELSE site.OpenEveryday = open_everyday END;
 END //
 DELIMITER ;
 
 /* Page 20 - Edit Site*/
 DELIMITER //
-CREATE PROCEDURE s20_edit_site(IN old_name VARCHAR(50),new_name VARCHAR(50), address VARCHAR(50), zipcode CHAR(5), fname VARCHAR(50),lname VARCHAR(50), open_everyday ENUM('Yes','No'))
+CREATE PROCEDURE s20_edit_site(IN
+  old_name VARCHAR(50),
+  new_name VARCHAR(50),
+  address VARCHAR(50),
+  zipcode CHAR(5),
+  fname VARCHAR(50),
+  lname VARCHAR(50),
+  open_everyday ENUM('Yes','No'))
 BEGIN
 
 UPDATE site
