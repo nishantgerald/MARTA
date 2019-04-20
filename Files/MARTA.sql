@@ -498,6 +498,41 @@ INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffR
 VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
 END //
 DELIMITER ;
+	      
+DELIMITER //
+/* Need EMPLOYEE Fname and Lname (WORKING!) */
+CREATE PROCEDURE 28_mgr_manage_staff(IN SName VARCHAR(50), EmpID CHAR(9), SDate date, EDate date) 
+BEGIN
+	/* Need COUNT and all NULL conditions */
+	IF EmpID IS NULL THEN
+		SELECT * 
+        FROM (
+			SELECT CONCAT(Firstname, ' ', Lastname)
+			FROM user
+			WHERE Username IN(
+			SELECT StaffUsername
+			FROM staff_assignment
+			WHERE (staff_assignment.StartDate BETWEEN SDate AND EDate)
+			AND SName = staff_assignment.SiteName))) AS 'Staff Name'
+		INNER JOIN (SELECT COUNT(*)
+			FROM staff_assignment
+            WHERE (staff_assignment.StartDate BETWEEN SDate AND EDate)
+            AND SName = staff_assignment.SiteName)AS 'Event Count';
+        /*
+        COUNT(*) FROM staff_assignment
+        
+        WHERE (staff_assignment.StartDate BETWEEN SDate AND Edate) AND SName = staff_assignment.SiteName; */
+        /*GROUP BY StaffUserName; */ 
+	ELSE
+		/* Needs complete adjustment. Not functioning*/
+		SELECT 
+		(SELECT DISTINCT StaffUsername FROM staff_assignment
+        WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Staff Name',
+        (SELECT COUNT(StaffUsername) FROM staff_assignment
+        WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Event Shifts';
+	END IF;
+END //
+DELIMITER ;
 
 #EXPLORE SITE - Page 35
 
