@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Functionality</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <style type="text/css">
+        body{ font: 14px sans-serif; }
+        .wrapper{ width: 350px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Staff Functionality</h2>
+        <form action="{{url_for('staff_functionality') }}" method="POST">
+            <div class="form-group">
+                <p><input type="submit" class="btn btn-primary" value="Manage Profile" name="manage_profile" /></p>
+                <p><input type="submit" class="btn btn-primary" value="View Schedule" name="view_schedule" /></p>
+				<p><input type="submit" class="btn btn-primary" value="Take Transit" name="take_transit" /></p>
+				<p><input type="submit" class="btn btn-primary" value="View Transit History" name="view_transit_history" /></p>
+				<p><input type="submit" class="btn btn-primary" value="Back" name="back" /></p>
+				<p><in
+            </div>
+        </form>
+    </div>
+</body>
+</html>

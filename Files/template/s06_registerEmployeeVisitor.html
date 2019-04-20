@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Register Employee-Visitor</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <style type="text/css">
+        body{ font: 14px sans-serif; }
+        .wrapper{ width: 350px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Register Employee-Visitor</h2>
+        <form action="{{ url_for('register_employee_visitor') }}" method="POST">
+            <div class="form-group">
+                <p>
+                <label>First Name</label>
+                <input type="text" name="FirstName" class="form-control" />
+                <label>Last Name</label>
+                <input type="text" name="LastName" class="form-control" />
+                </p>
+            </div>
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="UserName" class="form-control" />
+            </div>
+			<form>
+       			<fieldset>
+			          <p>
+			             <label>Employee Type</label>
+						 <br>
+			             <select id = "myList">
+				               <option value = "1">Manager</option>
+				               <option value = "2">Staff</option>
+				         </select>
+			          </p>
+       			</fieldset>
+    		</form>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" class="form-control" />
+                <label>Confirm Password</label>
+                <input type="password" name="password" class="form-control" />
+            </div>
+			<div class="form-group">
+                <label>Phone</label>
+                <input type="text" name="phone" class="form-control" />
+                <label>Address</label>
+                <input type="text" name="address" class="form-control" />
+            </div>
+			<div class="form-group">
+                <label>City</label>
+                <input type="text" name="city" class="form-control" />
+				<form>
+	       			<fieldset>
+				          <p>
+				             <label>State</label>
+							 <br>
+				             <select id = "myList">
+					               <option value = "1">AK</option>
+					               <option value = "2">AL</option>
+								   <option value = "3">AR</option>
+								   <option value = "4">AZ</option>
+								   <option value = "5">CA</option>
+								   <option value = "6">CO</option>
+								   <option value = "7">CT</option>
+								   <option value = "8">DE</option>
+								   <option value = "9">FL</option>
+								   <option value = "10">GA</option>
+								   <option value = "11">HI</option>
+								   <option value = "12">IA</option>
+								   <option value = "13">ID</option>
+								   <option value = "14">IL</option>
+								   <option value = "15">IN</option>
+								   <option value = "16">KS</option>
+								   <option value = "17">KY</option>
+								   <option value = "18">LA</option>
+								   <option value = "19">MA</option>
+								   <option value = "20">MD</option>
+								   <option value = "21">ME</option>
+								   <option value = "22">MI</option>
+								   <option value = "23">MN</option>
+								   <option value = "24">MO</option>
+								   <option value = "25">MS</option>
+								   <option value = "26">MT</option>
+								   <option value = "27">NC</option>
+								   <option value = "28">ND</option>
+								   <option value = "29">NE</option>
+								   <option value = "30">NH</option>>
+								   <option value = "31">NJ</option>
+								   <option value = "32">NM</option>
+								   <option value = "33">NV</option>
+								   <option value = "34">NY</option>
+								   <option value = "35">OH</option>
+								   <option value = "36">OK</option>
+								   <option value = "37">OR</option>
+								   <option value = "38">PA</option>
+								   <option value = "39">RI</option>
+								   <option value = "40">SC</option>
+								   <option value = "41">SD</option>
+								   <option value = "42">TN</option>
+								   <option value = "43">TX</option>
+								   <option value = "44">UT</option>
+								   <option value = "45">VA</option>
+								   <option value = "46">VT</option>
+								   <option value = "47">WA</option>
+								   <option value = "48">WI</option>
+								   <option value = "49">WV</option>
+								   <option value = "50">WY</option>
+								   <option value = "51">Other</option>
+					         </select>
+				          </p>
+	       			</fieldset>
+	    		</form>
+				<label>Zipcode</label>
+                <input type="text" name="zipcode" class="form-control" />
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="text" name="Email" class="form-control" />
+				<br>
+				<input type="submit" class="btn btn-primary" value="Add" name="email" />
+            </div>
+            <div class="form-group">
+                <input type="submit" class="btn btn-primary" value="Back" name="login" />
+                <input type="submit" class="btn btn-primary" value="Register" name="register" />
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Manage User</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <style type="text/css">
+        body{ font: 14px sans-serif; }
+        .wrapper{ width: 350px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Manage User</h2>
+        <form action="{{ url_for('admin_manage_user') }}" method="POST">
+			<form>
+				<label>Username</label>
+                <input type="text" name="username" class="form-control" />
+				<fieldset>
+					  <p>
+						 <label>Type</label>
+						 <br>
+						 <select id = "myList">
+							   <option value = "1">Manager</option>
+							   <option value = "2">Staff</option>
+							   <option value = "3">User</option>
+							   <option value = "4">Visitor</option>
+						 </select>
+					  </p>
+					  <p>
+						 <label>Status</label>
+						 <br>
+						 <select id = "myList">
+							   <option value = "1">Approved</option>
+							   <option value = "2">Pending</option>
+							   <option value = "3">Declined</option>
+						 </select>
+					  </p>
+				</fieldset>
+				</form>
+				<div class="form-group">
+					<input type="submit" class="btn btn-primary" value="Filter" name="Filter" />
+					<br><br>
+					<input type="submit" class="btn btn-primary" value="Approve" name="Approve" />
+					<input type="submit" class="btn btn-primary" value="Decline" name="Decline" />
+
+            <div class="form-group">
+				<br><input type="submit" class="btn btn-primary" value="Back" name="back" />
+            </div>
+        </form>
+    </div>
+</body>
+</html>

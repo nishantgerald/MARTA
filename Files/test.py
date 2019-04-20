@@ -1,5 +1,5 @@
 import pymysql.cursors
-from flask import Flask, session, redirect, url_for, escape, request, render_template
+from flask import Flask, session, redirect, url_for, escape, request, render_template, jsonify
 import json
 
 from flask import Flask
@@ -34,10 +34,41 @@ def login():
                     #EVERYTHING UNTIL THIS POINT WORKS-----------------
                 if user_result == '1':
                     with connection.cursor() as cursor2:
-                        pass_result = cursor2.callproc('s01_user_login_check_password', [username, password])
-                        return json.dumps(cursor2.fetchone())
+                        cursor2.callproc('s01_user_login_check_password', [username, password])
+                        pass_result = cursor2.fetchall()
+                        output = [row for row in pass_result]
+                        user_type = output[0]["UserType"]
                 else:
                     return "ERROR: Invalid Username"
+
+                if user_type == "Employee":
+                    with connection.cursor() as cursor3:
+                        cursor3.callproc('s01_employee_check_type', [username])
+                        employee_result = cursor3.fetchall()
+                        output = [row for row in pass_result]
+                        employee_type = output[0]["EmployeeType"]
+                    if employee_type == "Admin":
+                        render_template('s08_adminFunctionality.html')
+                    elif employee_type == "Manager":
+                        render_template('s10_managerFunctionality.html')
+                    elif employee_type == "Staff":
+                        render_template('s12_staffFunctionality.html')
+                elif userType == "Employee, Visitor":
+                    with connection.cursor() as cursor3:
+                        cursor3.callproc('s01_employee_check_type', [username])
+                        employee_result = cursor3.fetchall()
+                        output = [row for row in pass_result]
+                        employee_type = output[0]["EmployeeType"]
+                    if employee_type == "Admin":
+                        render_template('s09_adminVisitorFunctionality.html')
+                    elif employee_type == "Manager":
+                        render_template('s11_managerVisitorFunctionality.html')
+                    elif employee_type == "Staff":
+                        render_template('s13_staffVisitorFunctionality.html')
+                elif user_type == "Visitor":
+                    render_template('s14_visitorFunctionality')
+                elif user_type == "User":
+                    render_template('s07_userFunctionality')
 
         except Exception as e:
             print(e)
