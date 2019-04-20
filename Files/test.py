@@ -135,15 +135,15 @@ def manager_visitor_functionality():
     return  
 
 @app.route('/staff_functionality', methods=['GET', 'POST'])
-def user_functionality():
+def staff_functionality():
     return  
 
 @app.route('/staff_visitor_functionality', methods=['GET', 'POST'])
-def user_functionality():
+def staff_visitor_functionality():
     return  
 
 @app.route('/visitor_functionality', methods=['GET', 'POST'])
-def user_functionality():
+def visitor_functionality():
     return  
 
 if __name__ == '__main__':
