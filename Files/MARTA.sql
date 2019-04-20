@@ -179,60 +179,145 @@ CREATE PROCEDURE s34_log_event_visit(IN
  END //
 DELIMITER ;
 
-
-/* page 15 - Explore transit if choice is NOT 'ALL' */
+/* Page 15 - Take Transit*/
 DELIMITER //
 CREATE PROCEDURE s15_get_route(IN
   TType VARCHAR(50),
   Site VARCHAR(50),
-  TPriceMin DECIMAL(7,2),
-  TPriceMax DECIMAL(7,2))
+  PrangeL DECIMAL(7,2),
+  PrangeU DECIMAL(7,2))
 BEGIN
 SELECT connect.TransitType as Type,connect.TransitRoute as Route, transit.TransitPrice as Price, count(*) as No_of_Connected_Sites
 FROM transit
-INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
+JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
 GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitType,transit.TransitRoute) IN (
-  SELECT CONCAT(transit.TransitType,transit.TransitRoute));
+  SELECT DISTINCT CONCAT(transit.TransitType,transit.TransitRoute)
+  FROM transit
+  JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
+  WHERE
+  CASE WHEN TType IS NULL
+   THEN transit.TransitType=transit.TransitType
+   ELSE transit.TransitType = TType END
+   AND CASE WHEN Site IS NULL
+   THEN connect.SiteName = connect.SiteName
+   ELSE connect.SiteName = Site END
+   AND transit.TransitPrice BETWEEN PrangeL AND PrangeU);
 END //
 DELIMITER ;
 
+
 /* Page 16 - Transit History*/
-CREATE PROCEDURE s16_transit_history(IN TType VARCHAR(50), Site VARCHAR(50), Route VARCHAR(20), StartDate DATE, EndDate DATE)
+DELIMITER //
+CREATE PROCEDURE s16_transit_history(IN
+  TType VARCHAR(50),
+  Site VARCHAR(50),
+  Route VARCHAR(20),
+  StartDate DATE,
+  EndDate DATE)
 BEGIN
-SELECT DISTINCT take.TransitDate as Date,take.TransitType as Type,take.TransitRoute as Route, transit.TransitPrice as Price
+
+DROP VIEW IF EXISTS transit_connections;
+
+CREATE VIEW transit_connections AS
+SELECT transit.TransitType, transit.TransitRoute, transit.TransitPrice, connect.SiteName
 FROM transit
-INNER JOIN take ON transit.TransitType=take.TransitType AND transit.TransitRoute=take.TransitRoute
-INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
-WHERE transit.TransitType = TType AND take.TransitDate>=StartDate AND take.TransitDate<=EndDate AND connect.SiteName = Site;
+JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute;
+
+SELECT DISTINCT take.TransitDate as Date,take.TransitType as Type,take.TransitRoute as Route, transit_connections.TransitPrice as Price
+FROM take
+INNER JOIN transit_connections ON transit_connections.TransitType=take.TransitType AND transit_connections.TransitRoute=take.TransitRoute
+WHERE
+CASE WHEN TType IS NULL
+ THEN transit_connections.TransitType=transit_connections.TransitType
+ ELSE transit_connections.TransitType = TType END
+ AND CASE WHEN Site IS NULL
+ THEN transit_connections.SiteName = transit_connections.SiteName
+ ELSE transit_connections.SiteName = Site END
+  AND CASE WHEN Route IS NULL
+ THEN transit_connections.TransitRoute = transit_connections.TransitRoute
+ ELSE transit_connections.TransitRoute = Route END
+ AND take.TransitDate BETWEEN StartDate AND EndDate;
 END //
 DELIMITER ;
+
+/* page 17 - Employee Manage Profile */
+
 
 /* Page 18 - Manage User*/
 DELIMITER //
-CREATE PROCEDURE s18_manage_user(IN username VARCHAR(50), type ENUM('User','Visitor','Employee','Employee, Visitor'), status ENUM('Approved','Declined','Pending'))
+CREATE PROCEDURE s18_manage_user(IN
+  username VARCHAR(50),
+  type ENUM('User','Visitor','Employee','Employee, Visitor'),
+  status ENUM('Approved','Declined','Pending'))
 BEGIN
 SELECT DISTINCT user.Username as username,user.UserType as type, user.Status as status, count(*) as email_count
 FROM user
 INNER JOIN emails ON emails.Username=user.Username
-WHERE emails.Username = username AND user.UserType = type AND user.Status = status
-GROUP BY emails.Username;
+GROUP BY emails.Username, user.UserType HAVING CONCAT(user.Username,user.UserType) IN (
+  SELECT CONCAT(user.Username,user.UserType)
+  FROM user
+  WHERE
+   CASE WHEN type IS NULL
+   THEN user.UserType = user.UserType
+   ELSE user.UserType = type END
+   AND CASE WHEN username IS NULL
+   THEN user.Username = user.Username
+   ELSE user.Username = username END
+	AND CASE WHEN status IS NULL
+   THEN user.Status = user.Status
+   ELSE user.Status = status END);
 END //
+DELIMITER ;
+
+/* Page 18 - Update User Status */
+DELIMITER //
+CREATE PROCEDURE s18_user_status_update(IN
+  UName VARCHAR(50),
+  UStat ENUM('Approved','Declined'))
+BEGIN
+	UPDATE user
+  SET Status = UStat
+  WHERE Username = UName;
+ END //
 DELIMITER ;
 
 /* Page 19 - Manage Site*/
 DELIMITER //
-CREATE PROCEDURE s19_manage_site(IN sitename VARCHAR(50), fname VARCHAR(50), lname VARCHAR(50), open_everyday ENUM('Yes','No'))
+CREATE PROCEDURE s19_manage_site(IN
+  sitename VARCHAR(50),
+  fname VARCHAR(50),
+  lname VARCHAR(50),
+  open_everyday ENUM('Yes','No'))
 BEGIN
-SELECT site.SiteName as Name,CONCAT(fname,' ',lname) as Manager,site.OpenEveryday
+SELECT site.SiteName as Name,CONCAT(user.Firstname,' ',user.Lastname) as Manager,site.OpenEveryday
 FROM site
 INNER JOIN user ON user.Username=site.ManagerUsername
-WHERE user.FirstName= fname AND user.LastName = lname AND user.UserType IN ('Employee','Employee, Visitor');
+WHERE
+  CASE WHEN sitename IS NULL
+  THEN site.SiteName = site.SiteName
+  ELSE site.SiteName = sitename END
+  AND CASE WHEN fname IS NULL
+  THEN user.Firstname = user.Firstname
+  ELSE user.Firstname = fname END
+  AND CASE WHEN lname IS NULL
+  THEN user.Lastname = user.Lastname
+  ELSE user.Lastname = lname END
+  AND CASE WHEN open_everyday IS NULL
+  THEN site.OpenEveryday = site.OpenEveryday
+  ELSE site.OpenEveryday = open_everyday END;
 END //
 DELIMITER ;
 
 /* Page 20 - Edit Site*/
 DELIMITER //
-CREATE PROCEDURE s20_edit_site(IN old_name VARCHAR(50),new_name VARCHAR(50), address VARCHAR(50), zipcode CHAR(5), fname VARCHAR(50),lname VARCHAR(50), open_everyday ENUM('Yes','No'))
+CREATE PROCEDURE s20_edit_site(IN
+  old_name VARCHAR(50),
+  new_name VARCHAR(50),
+  address VARCHAR(50),
+  zipcode CHAR(5),
+  fname VARCHAR(50),
+  lname VARCHAR(50),
+  open_everyday ENUM('Yes','No'))
 BEGIN
 
 UPDATE site
@@ -251,7 +336,7 @@ BEGIN
 INSERT INTO site (Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUsername)
 VALUES (Site, SiteAddr, Zip, OpenErrday, Manager);
 END //
-DELIMITER; 
+DELIMITER;
 
 #MANAGE TRANSIT - Page 22
 #DeleteTransit removes a transit entry from transit table
@@ -276,7 +361,7 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE NumTransitLogged(Route VARCHAR(20))
 BEGIN
-SELECT COUNT(*) 
+SELECT COUNT(*)
 FROM take
 WHERE TransitRoute = Route;
 END //
@@ -290,7 +375,7 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE RemoveSites(IN Route VARCHAR(20))
 BEGIN
-DELETE FROM connect 
+DELETE FROM connect
 WHERE connect.TransitRoute = Route;
 END //
 DELIMITER;
@@ -363,7 +448,7 @@ SELECT COUNT(*)
 FROM staff_assignment
 WHERE EventName = Nombre and StartDate = StartD;
 END //
-DELIMITER; 
+DELIMITER;
 
 #VIEW/EDIT EVENT - Page 26
 #RemoveStaff removes staff entry from staff_assignment table
@@ -373,10 +458,10 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE RemoveStaff(IN Nombre VARCHAR(100), StartD Date, EmployeeName VARCHAR(50))
 BEGIN
-DELETE FROM staff_assignment 
+DELETE FROM staff_assignment
 WHERE EventName = Nombre and StartDate = StartD and EmployeeName = StaffUsername;
 END //
-DELIMITER; 
+DELIMITER;
 
 DELIMITER //
 CREATE PROCEDURE AddStaff(IN Nombre VARCHAR(100), StartD Date, EmployeeName VARCHAR(50), Site VARCHAR(50))
@@ -398,19 +483,54 @@ DELIMITER;
 /* Page 27 - Create Event */
 
 DELIMITER //
-CREATE PROCEDURE 27_staff_avail(IN SDate date) 
+CREATE PROCEDURE 27_staff_avail(IN SDate date)
 SELECT StaffUsername FROM staff_assignment
 WHERE SDate <> StartDate;
 END //
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE 27_mgr_create_event(IN Name VARCHAR(50), SDate date, EDate date, 
-Price DECIMAL(7,2), ECapacity INT(11), MinStaff INT(11), EDescr VARCHAR(1000), 
+CREATE PROCEDURE 27_mgr_create_event(IN Name VARCHAR(50), SDate date, EDate date,
+Price DECIMAL(7,2), ECapacity INT(11), MinStaff INT(11), EDescr VARCHAR(1000),
 SName VARCHAR(50))
-BEGIN 
-INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffRequired, Description, SiteName) 
+BEGIN
+INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffRequired, Description, SiteName)
 VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
+END //
+DELIMITER ;
+	      
+DELIMITER //
+/* Need EMPLOYEE Fname and Lname (WORKING!) */
+CREATE PROCEDURE 28_mgr_manage_staff(IN SName VARCHAR(50), EmpID CHAR(9), SDate date, EDate date) 
+BEGIN
+	/* Need COUNT and all NULL conditions */
+	IF EmpID IS NULL THEN
+		SELECT * 
+        FROM (
+			SELECT CONCAT(Firstname, ' ', Lastname)
+			FROM user
+			WHERE Username IN(
+			SELECT StaffUsername
+			FROM staff_assignment
+			WHERE (staff_assignment.StartDate BETWEEN SDate AND EDate)
+			AND SName = staff_assignment.SiteName))) AS 'Staff Name'
+		INNER JOIN (SELECT COUNT(*)
+			FROM staff_assignment
+            WHERE (staff_assignment.StartDate BETWEEN SDate AND EDate)
+            AND SName = staff_assignment.SiteName)AS 'Event Count';
+        /*
+        COUNT(*) FROM staff_assignment
+        
+        WHERE (staff_assignment.StartDate BETWEEN SDate AND Edate) AND SName = staff_assignment.SiteName; */
+        /*GROUP BY StaffUserName; */ 
+	ELSE
+		/* Needs complete adjustment. Not functioning*/
+		SELECT 
+		(SELECT DISTINCT StaffUsername FROM staff_assignment
+        WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Staff Name',
+        (SELECT COUNT(StaffUsername) FROM staff_assignment
+        WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Event Shifts';
+	END IF;
 END //
 DELIMITER ;
 
