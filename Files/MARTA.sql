@@ -4,7 +4,7 @@ CREATE PROCEDURE s01_user_login_check_email(IN
   EMailID VARCHAR(50))
 BEGIN
 	SELECT EXISTS (SELECT Username FROM emails WHERE Email = EMailID);
- END //
+ END //s01_user_login_check_email
 DELIMITER ;s01_user_login_check_email
 
 DELIMITER //
