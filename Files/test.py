@@ -23,6 +23,13 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Connect to the database
+    connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='root',
+                             db='Beltline',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
     if "login" in request.form:
         user_email = request.form['username']
         password = request.form['password']
@@ -42,6 +49,9 @@ def login():
                         pass_result = cursor2.fetchall()
                         output = [row for row in pass_result]
                         user_type = output[0]["UserType"]
+                        user_status = output[0]["Status"]
+                        if user_status != "Approved":
+                            return "Sorry, your account is not approved for login"
                 else:
                     return "ERROR: Invalid Username"
 
