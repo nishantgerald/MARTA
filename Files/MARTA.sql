@@ -4,7 +4,7 @@ CREATE PROCEDURE s01_user_login_check_email(IN
   EMailID VARCHAR(50))
 BEGIN
 	SELECT EXISTS (SELECT Username FROM emails WHERE Email = EMailID);
- END //
+ END //s01_user_login_check_email
 DELIMITER ;s01_user_login_check_email
 
 DELIMITER //
@@ -19,13 +19,8 @@ BEGIN
 DELIMITER ;
 
 DELIMITER //
-<<<<<<< HEAD
-CREATE PROs01_user_login_check_passwordCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50))
-=======
 CREATE PROCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50)
->>>>>>> da4a5046851a4aa8ec739ae8f1fcf686042bea77
+  EMailID VARCHAR(50))
 BEGIN
 	SELECT EmployeeType
     FROM employee
@@ -184,7 +179,7 @@ CREATE PROCEDURE s34_log_event_visit(IN
  END //
 DELIMITER ;
 
-/* Page 16 - Take Transit*/
+/* Page 15 - Take Transit*/
 DELIMITER //
 CREATE PROCEDURE s15_get_route(IN
   TType VARCHAR(50),
@@ -341,7 +336,7 @@ BEGIN
 INSERT INTO site (Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUsername)
 VALUES (Site, SiteAddr, Zip, OpenErrday, Manager);
 END //
-DELIMITER; 
+DELIMITER;
 
 #MANAGE TRANSIT - Page 22
 #DeleteTransit removes a transit entry from transit table
@@ -366,7 +361,7 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE NumTransitLogged(Route VARCHAR(20))
 BEGIN
-SELECT COUNT(*) 
+SELECT COUNT(*)
 FROM take
 WHERE TransitRoute = Route;
 END //
@@ -380,7 +375,7 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE RemoveSites(IN Route VARCHAR(20))
 BEGIN
-DELETE FROM connect 
+DELETE FROM connect
 WHERE connect.TransitRoute = Route;
 END //
 DELIMITER;
@@ -453,7 +448,7 @@ SELECT COUNT(*)
 FROM staff_assignment
 WHERE EventName = Nombre and StartDate = StartD;
 END //
-DELIMITER; 
+DELIMITER;
 
 #VIEW/EDIT EVENT - Page 26
 #RemoveStaff removes staff entry from staff_assignment table
@@ -463,10 +458,10 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE RemoveStaff(IN Nombre VARCHAR(100), StartD Date, EmployeeName VARCHAR(50))
 BEGIN
-DELETE FROM staff_assignment 
+DELETE FROM staff_assignment
 WHERE EventName = Nombre and StartDate = StartD and EmployeeName = StaffUsername;
 END //
-DELIMITER; 
+DELIMITER;
 
 DELIMITER //
 CREATE PROCEDURE AddStaff(IN Nombre VARCHAR(100), StartD Date, EmployeeName VARCHAR(50), Site VARCHAR(50))
@@ -484,6 +479,25 @@ SET Description = Descr
 WHERE EventName = Nombre and StartDate = StartD and SiteName = Site;
 END //
 DELIMITER;
+
+/* Page 27 - Create Event */
+
+DELIMITER //
+CREATE PROCEDURE 27_staff_avail(IN SDate date)
+SELECT StaffUsername FROM staff_assignment
+WHERE SDate <> StartDate;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE 27_mgr_create_event(IN Name VARCHAR(50), SDate date, EDate date,
+Price DECIMAL(7,2), ECapacity INT(11), MinStaff INT(11), EDescr VARCHAR(1000),
+SName VARCHAR(50))
+BEGIN
+INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffRequired, Description, SiteName)
+VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
+END //
+DELIMITER ;
 
 #EXPLORE SITE - Page 35
 

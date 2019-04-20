@@ -4,8 +4,18 @@ import json
 
 from flask import Flask
 app = Flask(__name__, template_folder='template')
-# Connect to the database
 
+user_email = ""
+user_type = ""
+employee_type = ""
+username = ""
+# Connect to the database
+connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='root',
+                             db='Beltline',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
 
 @app.route('/')
 def index():
@@ -13,14 +23,8 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='root',
-                             db='Beltline',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
     if "login" in request.form:
-        username = request.form['username']
+        user_email = request.form['username']
         password = request.form['password']
 
         try:
@@ -29,12 +33,12 @@ def login():
                 with connection.cursor() as cursor:
 
                 # Read a single record
-                    cursor.callproc('s01_user_login_check_email', [username])
+                    cursor.callproc('s01_user_login_check_email', [user_email])
                     user_result = str(json.dumps(cursor.fetchone()))[-2]
-                    #EVERYTHING UNTIL THIS POINT WORKS-----------------
+                    
                 if user_result == '1':
                     with connection.cursor() as cursor2:
-                        cursor2.callproc('s01_user_login_check_password', [username, password])
+                        cursor2.callproc('s01_user_login_check_password', [user_email, password])
                         pass_result = cursor2.fetchall()
                         output = [row for row in pass_result]
                         user_type = output[0]["UserType"]
@@ -43,35 +47,36 @@ def login():
 
                 if user_type == "Employee":
                     with connection.cursor() as cursor3:
-                        cursor3.callproc('s01_employee_check_type', [username])
+                        cursor3.callproc('s01_employee_check_type', [user_email])
                         employee_result = cursor3.fetchall()
-                        output = [row for row in pass_result]
+                        output = [row for row in employee_result]
                         employee_type = output[0]["EmployeeType"]
                     if employee_type == "Admin":
-                        render_template('s08_adminFunctionality.html')
+                        return render_template('s08_adminFunctionality.html')
                     elif employee_type == "Manager":
-                        render_template('s10_managerFunctionality.html')
+                        return render_template('s10_managerFunctionality.html')
                     elif employee_type == "Staff":
-                        render_template('s12_staffFunctionality.html')
-                elif userType == "Employee, Visitor":
+                        return render_template('s12_staffFunctionality.html')
+                elif user_type == "Employee, Visitor":
                     with connection.cursor() as cursor3:
-                        cursor3.callproc('s01_employee_check_type', [username])
+                        cursor3.callproc('s01_employee_check_type', [user_email])
                         employee_result = cursor3.fetchall()
-                        output = [row for row in pass_result]
+                        output = [row for row in employee_result]
                         employee_type = output[0]["EmployeeType"]
                     if employee_type == "Admin":
-                        render_template('s09_adminVisitorFunctionality.html')
+                        return render_template('s09_adminVisitorFunctionality.html')
                     elif employee_type == "Manager":
-                        render_template('s11_managerVisitorFunctionality.html')
+                        return render_template('s11_managerVisitorFunctionality.html')
                     elif employee_type == "Staff":
-                        render_template('s13_staffVisitorFunctionality.html')
+                        return render_template('s13_staffVisitorFunctionality.html')
                 elif user_type == "Visitor":
-                    render_template('s14_visitorFunctionality')
+                    return render_template('s14_visitorFunctionality')
                 elif user_type == "User":
-                    render_template('s07_userFunctionality')
+                    return render_template('s07_userFunctionality')
+                else: 
+                    return "INVALID USER TYPE"
 
         except Exception as e:
-            print(e)
             return str(e)
             
         finally:
@@ -90,7 +95,66 @@ def register_navigation():
     elif "employee_visitor" in request.form:
         return render_template('s06_registerEmployeeVisitor.html')
     elif "back" in request.form:
-        return render_template('s01_login.html')    
+        return render_template('s01_login.html')
+
+#EVERYTHING UNTIL THIS POINT WORKS----------------------------------------------------
+
+@app.route('/register_user', methods=['GET', 'POST'])
+def register_user():
+    return    
+
+@app.route('/register_visitor', methods=['GET', 'POST'])
+def register_visitor():
+    return  
+
+@app.route('/register_employee', methods=['GET', 'POST'])
+def register_employee():
+    return    
+
+@app.route('/register_employee_visitor', methods=['GET', 'POST'])
+def register_employee_visitor():
+    return  
+
+@app.route('/user_functionality', methods=['GET', 'POST'])
+def user_functionality():
+    return  
+
+@app.route('/admin_functionality', methods=['GET', 'POST'])
+def admin_functionality():
+    return  
+
+@app.route('/admin_visitor_functionality', methods=['GET', 'POST'])
+def admin_visitor_functionality():
+    return  
+
+@app.route('/mamager_functionality', methods=['GET', 'POST'])
+def manager_functionality():
+    return  
+
+@app.route('/manager_visitor_functionality', methods=['GET', 'POST'])
+def manager_visitor_functionality():
+    return  
+
+@app.route('/staff_functionality', methods=['GET', 'POST'])
+def staff_functionality():
+    return  
+
+@app.route('/staff_visitor_functionality', methods=['GET', 'POST'])
+def staff_visitor_functionality():
+    return  
+
+@app.route('/visitor_functionality', methods=['GET', 'POST'])
+def visitor_functionality():
+    return  
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+
+
+
+
+
+
