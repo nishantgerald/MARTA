@@ -1,0 +1,20 @@
+#~~Must update Password in user table to VARCHAR(100)~~
+
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('james.smith','$5$rounds=535000$Jh0w003Y6kulOdct$P5Tj.iGrLtUsTCJu.jfhmSVy.NlFJxRy6Cw1jXWsuY1','Approved','James','Smith','Employee');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('michael.smith','$5$rounds=535000$NVeCGT.DZegGdRpT$8PdJ6p6u9r88NvkUzZp.cbmwmE8LKqm1UgzSeTGQJxC','Approved','Michael','Smith','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('robert.smith','$5$rounds=535000$LGOJgQ7XXp7RD1ei$efrQ6Ajdx6swN3NmKiWsZqE9L4RHqv1hLgyVjjHnp83','Approved','Robert','Smith','Employee');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('maria.garcia','$5$rounds=535000$SXfdW3PoA8UGNIxg$j2ecyLVEKJ3Uqj6DJwQwLfl1eD2w0E8VLvzJxs.z8H1','Approved','Maria','Garcia','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('david.smith','$5$rounds=535000$JwStp.Lz.pDtkK6h$1os.eF7zAvgJiFqTgzvnGFPOHwJ/7SqusAdV9foeMZD','Approved','David','Smith','Employee');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('manager1','$5$rounds=535000$FtZZbrzN99cjvAJE$tvVD/QHkfIdJU2XBsACZW604cPliq8PgZJrulhipDHD','Pending','Manager','One','Employee');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('manager2','$5$rounds=535000$W0kSTEEukHXb.OaF$hJHsvSktwzbg3jrrx8Ddil7cL.k4FRUOjajcyOBFlS8','Approved','Manager','Two','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('manager3','$5$rounds=535000$5AEU4avw14hygbeX$gQfapzsGCufz9QBnLmxGJFe4OCLM40bAbZmEH26mYS8','Approved','Manager','Three','Employee');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('manager4','$5$rounds=535000$snAaGYD5oSfsKnx1$2UM6i6fUTqNKXJ6A.cvggNq62h1VWjxMNApVfStG8/3','Approved','Manager','Four','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('manager5','$5$rounds=535000$x5QAHG5elrmiAYfI$YeK/XQfivrlWHdK2y8.TErv2YppXZe9ujoub2tKvhvD','Approved','Manager','Five','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('maria.rodriguez','$5$rounds=535000$mXs4f3Ll6XLxmA2r$tRxiHjOasEh8ZoCpMfZyrg1424dU17.MqvBFpawW0O3','Declined','Maria','Rodriguez','Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('mary.smith','$5$rounds=535000$LGOJgQ7XXp7RD1ei$efrQ6Ajdx6swN3NmKiWsZqE9L4RHqv1hLgyVjjHnp83','Approved','Mary','Susersusersusersmith','Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('maria.hernandez','$5$rounds=535000$GOuHuk5PKRGb4uqq$rWuem9mQTwii9jvNR8g09GY/PaBZGCL1qPWPAobN8hA','Approved','Maria','Hernandez','User');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('staff1','$5$rounds=535000$f6VNwpGdMVp8ZF0o$HSWvserFeVlabc5xj.120Wx4dx.atGoPiv9YdzKdfU6','Approved','Staff','One','Employee');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('staff2','$5$rounds=535000$NBPUBRvS74YaIZsh$aEKqsA5kN9YjlP28n5zkTrRedcOfsAoA1BP3GKiFG.9','Approved','Staff','Two','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('staff3','$5$rounds=535000$XMypKqyuEzs0NyXX$P9tW3r/IwZHnxEK/YX8r3unaUdCI31mztW0boXf4jX7','Approved','Staff','Three','Employee, Visitor');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('user1','$5$rounds=535000$xQvd5ZGhsOZBKUPq$yFXrH6JsEtZLhHn5KWn/wPYj2qgjJGZEBlFr7UQuVy6','Pending','User','One','User');
+INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES ('visitor1','$5$rounds=535000$xBuMOfps7DsxOCzz$TTvCkl9vpxpB2ZyaxEMEpx1ZdrLC9s6YcrtBFhmgBBB','Approved','Visitor','One','Visitor');
