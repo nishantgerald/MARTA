@@ -115,37 +115,145 @@ def register_employee():
 def register_employee_visitor():
     return  
 
+#Navigation (below screens) work!!!--------------------------------------
+
 @app.route('/user_functionality', methods=['GET', 'POST'])
 def user_functionality():
-    return  
+    if "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "back" in request.form:
+        return render_template('s07_userFunctionality.html') 
 
 @app.route('/admin_functionality', methods=['GET', 'POST'])
 def admin_functionality():
-    return  
+    if "manage_profile" in request.form:
+        return render_template('s17_manageProfile.html')
+    elif "manage_user" in request.form:
+        return render_template('s18_adminManageUser.html')
+    elif "manage_transit" in request.form:
+        return render_template('s22_adminManageTransit.html')
+    elif "manage_site" in request.form:
+        return render_template('s19_adminManageSite.html')
+    elif "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "back" in request.form:
+        return render_template('s08_adminFunctionality.html')
 
 @app.route('/admin_visitor_functionality', methods=['GET', 'POST'])
 def admin_visitor_functionality():
-    return  
+    if "manage_profile" in request.form:
+        return render_template('s17_manageProfile.html')
+    elif "manage_user" in request.form:
+        return render_template('s18_adminManageUser.html')
+    elif "manage_transit" in request.form:
+        return render_template('s22_adminManageTransit.html')
+    elif "manage_site" in request.form:
+        return render_template('s19_adminManageSite.html')
+    elif "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_visit_history" in request.form:
+        return render_template('s38_visitorVisitHistory')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "explore_site" in request.form:
+        return render_template('s35_visitorExploreSite.html')
+    elif "explore_event" in request.form:
+        return render_template('s33_visitorExploreEvent.html')
+    elif "back" in request.form:
+        return render_template('s09_adminVisitorFunctionality.html')
 
-@app.route('/mamager_functionality', methods=['GET', 'POST'])
+@app.route('/manager_functionality', methods=['GET', 'POST'])
 def manager_functionality():
-    return  
+    if "manage_profile" in request.form:
+        return render_template('s17_manageProfile.html')
+    elif "manage_event" in request.form:
+        return render_template('s25_managerManageEvent.html')
+    elif "view_staff" in request.form:
+        return render_template('s28_managerManageStaff.html')
+    elif "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "view_site_report" in request.form:
+        return render_template('s29_managerSiteReport.html')
+    elif "back" in request.form:
+        return render_template('s10_managerFunctionality.html')
 
 @app.route('/manager_visitor_functionality', methods=['GET', 'POST'])
 def manager_visitor_functionality():
-    return  
+    if "manage_profile" in request.form:
+        return render_template('s17_manageProfile.html')
+    elif "manage_event" in request.form:
+        return render_template('s25_managerManageEvent.html')
+    elif "explore_event" in request.form:
+        return render_template('s33_visitorExploreEvent.html')
+    elif "explore_site" in request.form:
+        return render_template('s35_visitorExploreSite.html')
+    elif "view_staff" in request.form:
+        return render_template('s28_managerManageStaff.html')
+    elif "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "view_visit_history" in request.form:
+        return render_template('s38_visitorVisitHistory')
+    elif "view_site_report" in request.form:
+        return render_template('s29_managerSiteReport.html')
+    elif "back" in request.form:
+        return render_template('s11_managerVisitorFunctionality.html')
 
 @app.route('/staff_functionality', methods=['GET', 'POST'])
 def staff_functionality():
-    return  
+    if "manage_profile" in request.form:
+        return render_template('s17_manageProfile.html')
+    elif "view_schedule" in request.form:
+        return render_template('s31_staffViewSchedule.html')
+    elif "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "back" in request.form:
+        return render_template('s12_staffFunctionality.html')
 
 @app.route('/staff_visitor_functionality', methods=['GET', 'POST'])
 def staff_visitor_functionality():
-    return  
+    if "manage_profile" in request.form:
+        return render_template('s17_manageProfile.html')
+    elif "view_schedule" in request.form:
+        return render_template('s31_staffViewSchedule.html')
+    elif "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "explore_event" in request.form:
+        return render_template('s33_visitorExploreEvent.html')
+    elif "explore_site" in request.form:
+        return render_template('s35_visitorExploreSite.html')
+    elif "view_visit_history" in request.form:
+        return render_template('s38_visitorVisitHistory')
+    elif "back" in request.form:
+        return render_template('s13_staffVisitorFunctionality.html')  
 
 @app.route('/visitor_functionality', methods=['GET', 'POST'])
 def visitor_functionality():
-    return  
+    if "take_transit" in request.form:
+        return render_template('s15_userTakeTransit.html')
+    elif "view_transit_history" in request.form:
+        return render_template('s16_userTransitHistory.html')
+    elif "explore_event" in request.form:
+        return render_template('s33_visitorExploreEvent.html')
+    elif "explore_site" in request.form:
+        return render_template('s35_visitorExploreSite.html')
+    elif "view_visit_history" in request.form:
+        return render_template('s38_visitorVisitHistory')
+    elif "back" in request.form:
+        return render_template('s14_visitorFunctionality.html')
+
+#End navigation screens-----------------------------------------
 
 if __name__ == '__main__':
     app.run(debug=True)
