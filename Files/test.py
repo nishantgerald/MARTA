@@ -103,8 +103,57 @@ def register_user():
     return    
 
 @app.route('/register_visitor', methods=['GET', 'POST'])
-def register_user():
+def register_visitor():
+    return  
+
+@app.route('/register_employee', methods=['GET', 'POST'])
+def register_employee():
     return    
+
+@app.route('/register_employee_visitor', methods=['GET', 'POST'])
+def register_employee_visitor():
+    return  
+
+@app.route('/user_functionality', methods=['GET', 'POST'])
+def user_functionality():
+    return  
+
+@app.route('/admin_functionality', methods=['GET', 'POST'])
+def admin_functionality():
+    return  
+
+@app.route('/admin_visitor_functionality', methods=['GET', 'POST'])
+def admin_visitor_functionality():
+    return  
+
+@app.route('/mamager_functionality', methods=['GET', 'POST'])
+def manager_functionality():
+    return  
+
+@app.route('/manager_visitor_functionality', methods=['GET', 'POST'])
+def manager_visitor_functionality():
+    return  
+
+@app.route('/staff_functionality', methods=['GET', 'POST'])
+def user_functionality():
+    return  
+
+@app.route('/staff_visitor_functionality', methods=['GET', 'POST'])
+def user_functionality():
+    return  
+
+@app.route('/visitor_functionality', methods=['GET', 'POST'])
+def user_functionality():
+    return  
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+
+
+
+
+
+
+
