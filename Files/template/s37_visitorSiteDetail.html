@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Visitor Site Detail</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <style type="text/css">
+        body{ font: 14px sans-serif; }
+        .wrapper{ width: 350px; padding: 20px; }
+    </style>
+</head>
+<body>
+    <div class="wrapper">
+        <h2>Site Detail</h2>
+        <form action="{{ url_for('visitor_site_detail') }}" method="POST">
+			<form>
+					 <label>Start Date</label>
+					 <input type="text" name="start_date" class="form-control" />
+					 <label>End Date</label>
+					 <input type="text" name="end_date" class="form-control" />
+					 <label>Event Count Min</label>
+					 <input type="text" name="event_count_min" class="form-control" />
+					 <label>Event Count Max</label>
+					<input type="text" name="event_count_max" class="form-control" />
+					<label>Staff Count Min</label>
+					<input type="text" name="staff_count_min" class="form-control" />
+					<label>Staff Count Max</label>
+				   <input type="text" name="staff_count_max" class="form-control" />
+				   <label>Total Visits Min</label>
+				   <input type="text" name="total_visits_min" class="form-control" />
+				   <label>Total Visits Max</label>
+				  <input type="text" name="total_visits_max" class="form-control" />
+				  <label>Total Revenue Min</label>
+				  <input type="text" name="total_revenue_min" class="form-control" />
+				  <label>Total Revenue Max</label>
+				 <input type="text" name="total_revenue_max" class="form-control" />
+				<div class="form-group">
+					<br><input type="submit" class="btn btn-primary" value="Filter" name="filter" />
+					<input type="submit" class="btn btn-primary" value="Daily Detail" name="daily_detail" />
+				</div>
+        		<div class="form-group">
+				<input type="submit" class="btn btn-primary" value="Back" name="back" />
+            	</div>
+        </form>
+    </div>
+</body>
+</html>
