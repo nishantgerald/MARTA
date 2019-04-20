@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Register User Only</title>
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.css">
+    <link rel="stylesheet" href="../css/bootstrap.css">
     <style type="text/css">
         body{ font: 14px sans-serif; }
         .wrapper{ width: 350px; padding: 20px; }
@@ -13,28 +13,32 @@
     <script>
     var emailID = 0;
     function emailButton(){
-      emailID++;
-      var html = '<input type="text" name="Email" class="form-control" /> ' +
-                 '<a href="" onclick="javascript:removeElement("email"+emailID); return false;">Remove</a>';
-      addElement('emails', 'p', "email"+emailID, html)
-      console.log("This is ",emailID);
+        emailID++;
+        var html = '<input type="text" name="Email" class="form-control" /> ' +
+               '<a href="" onclick="javascript:removeElement(emailID); return false;">Remove</a>';
+        addElement('emails', 'p', emailID, html);
     }
     function addElement(parentId, elementTag, elementId, html) {
-      // Adds an element to the document
-      var p = document.getElementById(parentId);
-      var newElement = document.createElement(elementTag);
-      newElement.setAttribute('id', elementId);
-      newElement.setAttribute('type', 'text');
-      newElement.setAttribute('placeholder', 'avc');
-      newElement.innerHTML = html;
-      p.appendChild(newElement);
+        // Adds an element to the document
+        var p = document.getElementById(parentId);
+        var newElement = document.createElement(elementTag);
+        newElement.setAttribute('id', elementId);
+        newElement.innerHTML = html;
+        p.appendChild(newElement);
     }
     function removeElement(elementId) {
-      // Removes an element from the document
-      var element = document.getElementById(elementId);
-      element.parentNode.removeChild(element);
+        // Removes an element from the document
+        var element = document.getElementById(elementId);
+        element.parentNode.removeChild(element);
     }
-  </script>
+    function addEmail() {
+        var x = document.createElement('newemail');
+        x.setAttribute("type", "text");
+        x.setAttribute("class", "form-control");
+        x.setAttribute("id", elementId)
+        document.getElementById('emails').appendChild(x);
+    }
+    </script>
     <div class="wrapper">
         <h2>Register User Only</h2>
         <form action="{{ url_for('register_user') }}" method="POST">

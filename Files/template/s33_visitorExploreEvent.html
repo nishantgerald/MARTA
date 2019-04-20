@@ -14,26 +14,46 @@
         <h2>Site Report</h2>
         <form action="{{ url_for('visitor_explore_event') }}" method="POST">
 			<form>
-					 <label>Start Date</label>
-					 <input type="text" name="start_date" class="form-control" />
-					 <label>End Date</label>
-					 <input type="text" name="end_date" class="form-control" />
-					 <label>Event Count Min</label>
-					 <input type="text" name="event_count_min" class="form-control" />
-					 <label>Event Count Max</label>
-					<input type="text" name="event_count_max" class="form-control" />
-					<label>Staff Count Min</label>
-					<input type="text" name="staff_count_min" class="form-control" />
-					<label>Staff Count Max</label>
-				   <input type="text" name="staff_count_max" class="form-control" />
+				<label>Name</label>
+				<input type="text" name="name" class="form-control" />
+				<label>Description</label>
+				<input type="text" name="description" class="form-control" />
+			</form>
+			<form>
+				<p>
+				   <label>Site Name</label>
+				   <br>
+				   <select id = "site">
+						 <option value = "1">--ALL--</option>
+				   </select>
+				</p>
+			</form>
+			<form>
+				<label>Start Date</label>
+				<input type="text" name="start_date" class="form-control" />
+				<label>End Date</label>
+				<input type="text" name="end_date" class="form-control" />
+			</form>
+			<form>
 				   <label>Total Visits Min</label>
 				   <input type="text" name="total_visits_min" class="form-control" />
 				   <label>Total Visits Max</label>
 				  <input type="text" name="total_visits_max" class="form-control" />
-				  <label>Total Revenue Min</label>
+			  </form>
+			  <form>
+				  <label>Ticket Price Min</label>
 				  <input type="text" name="total_revenue_min" class="form-control" />
-				  <label>Total Revenue Max</label>
+				  <label>Ticket Price Max</label>
 				 <input type="text" name="total_revenue_max" class="form-control" />
+			 </form>
+			 <form>
+				 <input type="checkbox" id="include_visited" name="checkbox" checked>
+ 				<label for="include_visited">Include Visited</label>
+				<input type="checkbox" id="include_soldout_events" name="checkbox" checked>
+			   <label for="include_soldout_events">Include Sold Out Events</label>
+			 </form>
+
+			 <form>
 				<div class="form-group">
 					<br><input type="submit" class="btn btn-primary" value="Filter" name="filter" />
 					<input type="submit" class="btn btn-primary" value="Daily Detail" name="daily_detail" />

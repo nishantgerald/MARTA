@@ -327,50 +327,80 @@ WHERE site.SiteName = old_name;
 END //
 DELIMITER ;
 
-#CREATE SITE - PAGE 21
-#CreateSite adds a new site entry into site table
+/*CREATE SITE - PAGE 21 CreateSite adds a new site entry into site table*/
 
+/* Page 20 - Edit Site*/
 DELIMITER //
-CREATE PROCEDURE CreateSite(IN Site VARCHAR(50), SiteAddr VARCHAR (100), Zip CHAR(5), OpenErrday ENUM('Yes','No'), Manager VARCHAR(50))
+CREATE PROCEDURE s20_create_site(IN
+  SName VARCHAR(50),
+  SAddress VARCHAR(50),
+  SZipcode CHAR(5),
+  Fname VARCHAR(50),
+  Lname VARCHAR(50),
+  open_everyday ENUM('Yes','No'))
 BEGIN
-INSERT INTO site (Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUsername)
-VALUES (Site, SiteAddr, Zip, OpenErrday, Manager);
+
+SET @Mgrname=(SELECT UserName FROM user WHERE user.Firstname=Fname AND user.Lastname=Lname);
+INSERT INTO site(Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUsername) VALUES (SName, SAddress, SZipcode, open_everyday, @Mgrname);
+
 END //
 DELIMITER;
 
-#MANAGE TRANSIT - Page 22
-#DeleteTransit removes a transit entry from transit table
+/*MANAGE TRANSIT - Page 22 DeleteTransit removes a transit entry from transit table*/
+DELIMITER //
+CREATE PROCEDURE s22_manage_transit(IN
+  TType ENUM('MARTA','Bus','Bike'),
+  Site VARCHAR(50),
+  Route VARCHAR(20),
+  PrangeL DECIMAL(7,2),
+  PrangeU DECIMAL(7,2))
+BEGIN
+
+DROP VIEW IF EXISTS log_counts;
+
+CREATE VIEW log_counts AS
+SELECT take.TransitType as TransitType, take.TransitRoute as TransitRoute, count(*) AS Num_logs
+FROM take
+GROUP BY take.TransitType, take.TransitRoute;
+
+SELECT transit.TransitType, transit.TransitRoute, transit.TransitPrice, log_counts.Num_logs, count(*) AS conn_sites
+FROM transit
+JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
+JOIN log_counts ON transit.TransitType=log_counts.TransitType AND transit.TransitRoute=log_counts.TransitRoute
+GROUP BY transit.TransitType, transit.TransitRoute, transit.TransitPrice HAVING CONCAT(transit.TransitType, transit.TransitRoute, transit.TransitPrice) IN(
+SELECT CONCAT(transit.TransitType, transit.TransitRoute, transit.TransitPrice)
+FROM transit
+JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
+WHERE
+CASE WHEN TType IS NULL
+ THEN transit.TransitType=transit.TransitType
+ ELSE transit.TransitType = TType END
+ AND CASE WHEN Site IS NULL
+ THEN connect.SiteName = connect.SiteName
+ ELSE connect.SiteName = Site END
+  AND CASE WHEN Route IS NULL
+ THEN connect.TransitRoute = connect.TransitRoute
+ ELSE connect.TransitRoute = Route END
+ AND transit.TransitPrice BETWEEN PrangeL AND PrangeU);
+
+END //
+DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE DeleteTransit(IN TType ENUM('MARTA','Bus','Bike'), Route VARCHAR(20))
+CREATE PROCEDURE DeleteTransit(IN
+  TType ENUM('MARTA','Bus','Bike'),
+  Route VARCHAR(20))
 BEGIN
 DELETE FROM transit
 WHERE TransitType = TType and TransitRoute = Route;
 END //
 DELIMITER;
 
-DELIMITER //
-CREATE PROCEDURE ConnectedSites(Route VARCHAR(20))
-BEGIN
-SELECT Count(*)
-FROM connect
-WHERE TransitRoute = Route;
-END //
-DELIMITER;
 
-DELIMITER //
-CREATE PROCEDURE NumTransitLogged(Route VARCHAR(20))
-BEGIN
-SELECT COUNT(*)
-FROM take
-WHERE TransitRoute = Route;
-END //
-DELIMITER;
-
-#EDIT EVENT - Page 23
+/*EDIT EVENT - Page 23
 #RemoveSites removes all entries matching the entered route num
 #EditTransit re adds rows corresponding to the newly entered sites
-#EditPrice updates price if it is changed in transit table
+#EditPrice updates price if it is changed in transit table*/
 
 DELIMITER //
 CREATE PROCEDURE RemoveSites(IN Route VARCHAR(20))
