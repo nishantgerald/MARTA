@@ -10,6 +10,35 @@
     </style>
 </head>
 <body>
+    <script>
+  var emailID = 0;
+  function emailButton(){
+    emailID++;
+    var html = '<input type="text" name="Email" class="form-control" /> ' +
+               '<a href="" onclick="javascript:removeElement(emailID); return false;">Remove</a>';
+    addElement('emails', 'p', emailID, html);
+  }
+  function addElement(parentId, elementTag, elementId, html) {
+    // Adds an element to the document
+    var p = document.getElementById(parentId);
+    var newElement = document.createElement(elementTag);
+    newElement.setAttribute('id', elementId);
+    newElement.innerHTML = html;
+    p.appendChild(newElement);
+}
+function removeElement(elementId) {
+    // Removes an element from the document
+    var element = document.getElementById(elementId);
+    element.parentNode.removeChild(element);
+}
+  function addEmail() {
+    var x = document.createElement('newemail');
+    x.setAttribute("type", "text");
+    x.setAttribute("class", "form-control");
+    x.setAttribute("id", elementId)
+    document.getElementById('emails').appendChild(x);
+  }
+  </script>
     <div class="wrapper">
         <h2>Register User Only</h2>
         <form action="{{ url_for('register_user') }}" method="POST">
@@ -31,11 +60,10 @@
                 <label>Confirm Password</label>
                 <input type="password" name="password" class="form-control" />
             </div>
-            <div class="form-group">
-                <label>Email</label>
+            <label>Email</label>
+            <div class="form-group" id = "emails">
                 <input type="text" name="Email" class="form-control" />
-				<br>
-                <input type="submit" class="btn btn-primary" value="Add" name="email" />
+                <input type="submit" onclick="emailButton()" class="btn btn-primary" value="Add" name="email" />
             </div>
             <div class="form-group">
                 <input type="submit" class="btn btn-primary" value="Back" name="login" />
