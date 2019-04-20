@@ -4,15 +4,15 @@ CREATE PROCEDURE s01_user_login_check_email(IN
   EMailID VARCHAR(50))
 BEGIN
 	SELECT EXISTS (SELECT Username FROM emails WHERE Email = EMailID);
- END //s01_user_login_check_email
-DELIMITER ;s01_user_login_check_email
+ END //
+DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s01_user_login_check_password(IN
   EMailID VARCHAR(50),
   Pass VARCHAR(25))
 BEGIN
-	SELECT UserType
+	SELECT UserType, Status
     FROM user
     WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
  END //
@@ -498,14 +498,14 @@ INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffR
 VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
 END //
 DELIMITER ;
-	      
+
 DELIMITER //
 /* Need EMPLOYEE Fname and Lname (WORKING!) */
-CREATE PROCEDURE 28_mgr_manage_staff(IN SName VARCHAR(50), EmpID CHAR(9), SDate date, EDate date) 
+CREATE PROCEDURE 28_mgr_manage_staff(IN SName VARCHAR(50), EmpID CHAR(9), SDate date, EDate date)
 BEGIN
 	/* Need COUNT and all NULL conditions */
 	IF EmpID IS NULL THEN
-		SELECT * 
+		SELECT *
         FROM (
 			SELECT CONCAT(Firstname, ' ', Lastname)
 			FROM user
@@ -520,12 +520,12 @@ BEGIN
             AND SName = staff_assignment.SiteName)AS 'Event Count';
         /*
         COUNT(*) FROM staff_assignment
-        
+
         WHERE (staff_assignment.StartDate BETWEEN SDate AND Edate) AND SName = staff_assignment.SiteName; */
-        /*GROUP BY StaffUserName; */ 
+        /*GROUP BY StaffUserName; */
 	ELSE
 		/* Needs complete adjustment. Not functioning*/
-		SELECT 
+		SELECT
 		(SELECT DISTINCT StaffUsername FROM staff_assignment
         WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Staff Name',
         (SELECT COUNT(StaffUsername) FROM staff_assignment
