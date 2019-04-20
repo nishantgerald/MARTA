@@ -103,24 +103,23 @@ def register_navigation():
 
 @app.route('/register_user', methods=['GET', 'POST'])
 def register_user():
-    #return str(request.form)
     if "register" in request.form:
-        return "register"
         username = request.form['UserName']
         password = request.form['password'] #NEED TO HASH PASSWORD
+        #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
         firstname = request.form['FirstName']
         lastname = request.form['LastName']
-        values = [username, password, 'User', firstname, lastname]
+        values = [username, password, 'Pending', firstname, lastname, 'User']
         query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
         with connection.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, values)
             connection.commit()
+            #NEED TO TAKE IN EMAILS HERE
+
             return "Thank you for registering! You will be able to login once your account is approved."
-        #NEED TO TAKE IN EMAILS HERE
+
     elif "back" in request.form:
         return render_template('s02_registerNavigation.html')
-    else: 
-        return "OOPS"
 
 @app.route('/register_visitor', methods=['GET', 'POST'])
 def register_visitor():
