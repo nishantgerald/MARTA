@@ -4,7 +4,7 @@ CREATE PROCEDURE s01_user_login_check_email(IN
   EMailID VARCHAR(50))
 BEGIN
 	SELECT EXISTS (SELECT Username FROM emails WHERE Email = EMailID);
- END //
+ END //s01_user_login_check_email
 DELIMITER ;s01_user_login_check_email
 
 DELIMITER //
@@ -19,13 +19,8 @@ BEGIN
 DELIMITER ;
 
 DELIMITER //
-<<<<<<< HEAD
-CREATE PROs01_user_login_check_passwordCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50))
-=======
 CREATE PROCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50)
->>>>>>> da4a5046851a4aa8ec739ae8f1fcf686042bea77
+  EMailID VARCHAR(50))
 BEGIN
 	SELECT EmployeeType
     FROM employee
@@ -197,9 +192,7 @@ SELECT connect.TransitType as Type,connect.TransitRoute as Route, transit.Transi
 FROM transit
 INNER JOIN connect ON transit.TransitType=connect.TransitType AND transit.TransitRoute=connect.TransitRoute
 GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitType,transit.TransitRoute) IN (
-  SELECT CONCAT(transit.TransitType,transit.TransitRoute)
-
-)
+  SELECT CONCAT(transit.TransitType,transit.TransitRoute));
 END //
 DELIMITER ;
 
@@ -401,6 +394,25 @@ SET Description = Descr
 WHERE EventName = Nombre and StartDate = StartD and SiteName = Site;
 END //
 DELIMITER;
+
+/* Page 27 - Create Event */
+
+DELIMITER //
+CREATE PROCEDURE 27_staff_avail(IN SDate date) 
+SELECT StaffUsername FROM staff_assignment
+WHERE SDate <> StartDate;
+END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE 27_mgr_create_event(IN Name VARCHAR(50), SDate date, EDate date, 
+Price DECIMAL(7,2), ECapacity INT(11), MinStaff INT(11), EDescr VARCHAR(1000), 
+SName VARCHAR(50))
+BEGIN 
+INSERT INTO event(EventName, StartDate, EndDate, EventPrice, Capacity, MinStaffRequired, Description, SiteName) 
+VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
+END //
+DELIMITER ;
 
 #EXPLORE SITE - Page 35
 
