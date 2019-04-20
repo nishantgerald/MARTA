@@ -21,8 +21,6 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s01_employee_check_type(IN
   EMailID VARCHAR(50))
-CREATE PROCEDURE s01_employee_check_type(IN
-  EMailID VARCHAR(50))
 BEGIN
 	SELECT EmployeeType
     FROM employee
