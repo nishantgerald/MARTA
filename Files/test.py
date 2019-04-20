@@ -123,11 +123,43 @@ def register_user():
 
 @app.route('/register_visitor', methods=['GET', 'POST'])
 def register_visitor():
-    return render_template('success.html')
+    if "register" in request.form:
+        username = request.form['UserName']
+        password = request.form['password'] #NEED TO HASH PASSWORD
+        #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
+        firstname = request.form['FirstName']
+        lastname = request.form['LastName']
+        values = [username, password, 'Pending', firstname, lastname, 'Visitor']
+        query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
+        with connection.cursor() as cursor:
+            cursor.execute(query, values)
+            connection.commit()
+            #NEED TO TAKE IN EMAILS HERE
+
+            return "Thank you for registering! You will be able to login once your account is approved."
+
+    elif "back" in request.form:
+        return render_template('s02_registerNavigation.html')
 
 @app.route('/register_employee', methods=['GET', 'POST'])
 def register_employee():
-    return render_template('success.html')
+    if "register" in request.form:
+        username = request.form['UserName']
+        password = request.form['password'] #NEED TO HASH PASSWORD
+        #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
+        firstname = request.form['FirstName']
+        lastname = request.form['LastName']
+        values = [username, password, 'Pending', firstname, lastname, 'Employee']
+        query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
+        with connection.cursor() as cursor:
+            cursor.execute(query, values)
+            connection.commit()
+            #NEED TO TAKE IN EMAILS HERE
+
+            return "Thank you for registering! You will be able to login once your account is approved."
+
+    elif "back" in request.form:
+        return render_template('s02_registerNavigation.html')
 
 @app.route('/register_employee_visitor', methods=['GET', 'POST'])
 def register_employee_visitor():
