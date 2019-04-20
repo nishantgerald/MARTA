@@ -7,6 +7,11 @@
     <style type="text/css">
         body{ font: 14px sans-serif; }
         .wrapper{ width: 350px; padding: 20px; }
+		label{
+	 display: block;
+	 height: 35px;
+	 line-height: 35px;
+}
     </style>
 </head>
 <body>
@@ -14,32 +19,32 @@
         <h2>Create Transit</h2>
         <form action="{{ url_for('admin_create_transit') }}" method="POST">
 			<form>
-					 <label>Start Date</label>
+				<p>
+				   <label>Transport Type</label>
+				   <select id = "myList">
+						 <option value = "1">--ALL--</option>
+				   </select>
+				</p>
+					 <label>Route</label>
 					 <input type="text" name="start_date" class="form-control" />
-					 <label>End Date</label>
+					 <label>Price ($)</label>
 					 <input type="text" name="end_date" class="form-control" />
-					 <label>Event Count Min</label>
-					 <input type="text" name="event_count_min" class="form-control" />
-					 <label>Event Count Max</label>
-					<input type="text" name="event_count_max" class="form-control" />
-					<label>Staff Count Min</label>
-					<input type="text" name="staff_count_min" class="form-control" />
-					<label>Staff Count Max</label>
-				   <input type="text" name="staff_count_max" class="form-control" />
-				   <label>Total Visits Min</label>
-				   <input type="text" name="total_visits_min" class="form-control" />
-				   <label>Total Visits Max</label>
-				  <input type="text" name="total_visits_max" class="form-control" />
-				  <label>Total Revenue Min</label>
-				  <input type="text" name="total_revenue_min" class="form-control" />
-				  <label>Total Revenue Max</label>
-				 <input type="text" name="total_revenue_max" class="form-control" />
-				<div class="form-group">
-					<br><input type="submit" class="btn btn-primary" value="Filter" name="filter" />
-					<input type="submit" class="btn btn-primary" value="Daily Detail" name="daily_detail" />
-				</div>
+					 <label>Connected Sites:</label>
+					 <select multiple size="6">
+
+						 <option value="American">Placeholder 1</option>
+						 <option value="Andean">Placeholder 2</option>
+						 <option value="Chilean">Placeholder 3</option>
+						 <option value="Greater">Placeholder 4</option>
+						  <option value="James's">Placeholder 5</option>
+						  <option value="Lesser">Placeholder 6</option>
+					  </select>
+
+
         		<div class="form-group">
+					<br>
 				<input type="submit" class="btn btn-primary" value="Back" name="back" />
+				<input type="submit" class="btn btn-primary" value="Create" name="create" />
             	</div>
         </form>
     </div>
