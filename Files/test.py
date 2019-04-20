@@ -23,13 +23,6 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # Connect to the database
-    connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='root',
-                             db='Beltline',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
     if "login" in request.form:
         user_email = request.form['username']
         password = request.form['password']
@@ -38,7 +31,6 @@ def login():
             with open('MARTA.sql', 'r') as sql:
                 procs = sql.read().split(';')
                 with connection.cursor() as cursor:
-
                 # Read a single record
                     cursor.callproc('s01_user_login_check_email', [user_email])
                     user_result = str(json.dumps(cursor.fetchone()))[-2]
@@ -47,6 +39,8 @@ def login():
                     with connection.cursor() as cursor2:
                         cursor2.callproc('s01_user_login_check_password', [user_email, password])
                         pass_result = cursor2.fetchall()
+                        if len(pass_result) == 0:
+                            return "Incorrect password"
                         output = [row for row in pass_result]
                         user_type = output[0]["UserType"]
                         user_status = output[0]["Status"]
@@ -89,8 +83,6 @@ def login():
         except Exception as e:
             return str(e)
             
-        finally:
-            connection.close()
     elif "register" in request.form:
         return render_template('s02_registerNavigation.html')
 
@@ -111,19 +103,29 @@ def register_navigation():
 
 @app.route('/register_user', methods=['GET', 'POST'])
 def register_user():
-    return    
+    if "register" in request.form:
+        username = request.form['UserName']
+        password = request.form['password'] #NEED TO HASH PASSWORD
+        firstname = request.form['FirstName']
+        lastname = request.form['LastName']
+        with connection.cursor() as cursor:
+            cursor.callproc('s03_register_user', [username, password, 'User', firstname, lastname])
+            output = [row for row in pass_result]
+        #NEED TO TAKE IN EMAILS HERE
+    elif "login" in request.form:
+        return render_template('s02_registerNavigation.html')
 
 @app.route('/register_visitor', methods=['GET', 'POST'])
 def register_visitor():
-    return  
+    return render_template('success.html')
 
 @app.route('/register_employee', methods=['GET', 'POST'])
 def register_employee():
-    return    
+    return render_template('success.html')
 
 @app.route('/register_employee_visitor', methods=['GET', 'POST'])
 def register_employee_visitor():
-    return  
+    return  render_template('success.html')
 
 #Navigation (below screens) work!!!--------------------------------------
 
@@ -134,7 +136,7 @@ def user_functionality():
     elif "view_transit_history" in request.form:
         return render_template('s16_userTransitHistory.html')
     elif "back" in request.form:
-        return render_template('s07_userFunctionality.html') 
+        return render_template('s01_login.html') 
 
 @app.route('/admin_functionality', methods=['GET', 'POST'])
 def admin_functionality():
@@ -151,7 +153,7 @@ def admin_functionality():
     elif "view_transit_history" in request.form:
         return render_template('s16_userTransitHistory.html')
     elif "back" in request.form:
-        return render_template('s08_adminFunctionality.html')
+        return render_template('s01_login.html')
 
 @app.route('/admin_visitor_functionality', methods=['GET', 'POST'])
 def admin_visitor_functionality():
@@ -174,7 +176,7 @@ def admin_visitor_functionality():
     elif "explore_event" in request.form:
         return render_template('s33_visitorExploreEvent.html')
     elif "back" in request.form:
-        return render_template('s09_adminVisitorFunctionality.html')
+        return render_template('s01_login.html')
 
 @app.route('/manager_functionality', methods=['GET', 'POST'])
 def manager_functionality():
@@ -191,7 +193,7 @@ def manager_functionality():
     elif "view_site_report" in request.form:
         return render_template('s29_managerSiteReport.html')
     elif "back" in request.form:
-        return render_template('s10_managerFunctionality.html')
+        return render_template('s01_login.html')
 
 @app.route('/manager_visitor_functionality', methods=['GET', 'POST'])
 def manager_visitor_functionality():
@@ -214,7 +216,7 @@ def manager_visitor_functionality():
     elif "view_site_report" in request.form:
         return render_template('s29_managerSiteReport.html')
     elif "back" in request.form:
-        return render_template('s11_managerVisitorFunctionality.html')
+        return render_template('s01_login.html')
 
 @app.route('/staff_functionality', methods=['GET', 'POST'])
 def staff_functionality():
@@ -227,7 +229,7 @@ def staff_functionality():
     elif "view_transit_history" in request.form:
         return render_template('s16_userTransitHistory.html')
     elif "back" in request.form:
-        return render_template('s12_staffFunctionality.html')
+        return render_template('s01_login.html')
 
 @app.route('/staff_visitor_functionality', methods=['GET', 'POST'])
 def staff_visitor_functionality():
@@ -246,7 +248,7 @@ def staff_visitor_functionality():
     elif "view_visit_history" in request.form:
         return render_template('s38_visitorVisitHistory')
     elif "back" in request.form:
-        return render_template('s13_staffVisitorFunctionality.html')  
+        return render_template('s01_login.html')  
 
 @app.route('/visitor_functionality', methods=['GET', 'POST'])
 def visitor_functionality():
@@ -261,12 +263,20 @@ def visitor_functionality():
     elif "view_visit_history" in request.form:
         return render_template('s38_visitorVisitHistory')
     elif "back" in request.form:
-        return render_template('s14_visitorFunctionality.html')
+        return render_template('s01_login.html')
 
 #End navigation screens-----------------------------------------
 
 if __name__ == '__main__':
+        # Connect to the database
+    connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='root',
+                             db='Beltline',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
     app.run(debug=True)
+    connection.close()
 
 
 
