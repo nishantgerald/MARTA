@@ -850,25 +850,19 @@ CREATE PROCEDURE s35_explore_site(IN
  END //
 DELIMITER ;
 
-#DELIMITER //
-#CREATE PROCEDURE SelectSite(IN OpenErrday ENUM('Yes','No'), )
-
 /* Screen 36 - Visitor Transit Detail */
-#TransitDetail gets the route, transit type, and price info
-#ConnectedSites gets num of connected sites
-#LogTransit logs a transit in transit table
-
+#First get the table info
 DELIMITER //
-CREATE PROCEDURE s36_transit_detail(In TType ENUM('MARTA','Bus','Bike'))
+CREATE PROCEDURE s36_transit_detail(IN TType ENUM('MARTA','Bus','Bike'), sName VARCHAR(50))
 BEGIN
-Select TransitType, TransitRoute, TransitPrice
+SELECT transit.TransitRoute as Route, transit.TransitType as TransportType, transit.TransitPrice as Price
 FROM transit
-WHERE TransitType = TType;
+JOIN connect ON transit.TransitRoute = connect.TransitRoute AND transit.TransitType = connect.TransitType
+WHERE transit.TransitType = TType AND connect.siteName = sName;
 END //
-DELIMITER;
+DELIMITER ;
 
-#Use ConnectedSites from above
-
+#Log transit
 DELIMITER //
 CREATE PROCEDURE s36_log_transit(In TDate DATE, TType ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), UserN VARCHAR(50))
 BEGIN
