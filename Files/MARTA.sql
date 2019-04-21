@@ -845,12 +845,23 @@ DELIMITER;
 
 /* Screen 37 - Visitor Site Detail */
 #LogSiteVisit adds a log entry to visitsite table*/
-
 DELIMITER //
 CREATE PROCEDURE LogSiteVisit(IN VisitDate DATE, Nombre VARCHAR(50), Username VARCHAR(50))
 BEGIN
 INSERT INTO visitsite (VisitSiteDate, SiteName, VisitorUsername)
 VALUES (VisitDate, Nombre, Username);
 END //
+DELIMITER;
 
 /* Screen 38 - Visitor Site Detail */
+#First query for site list 
+DELIMITER //
+CREATE PROCEDURE s38_get_sites()
+BEGIN
+SELECT DISTINCT SiteName from site;
+END //
+DELIMITER;
+
+#Display Table
+CREATE PROCEDURE s38(IN
+
