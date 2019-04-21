@@ -17,7 +17,7 @@
 					  <p>
 						 <label>Site</label>
 						 <br>
-						 <select id = "myList">
+						 <select id = "myList" name='site_names'>
 							 {% for x in site_list %}
 						  <option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
 						  {% endfor %}
@@ -26,7 +26,7 @@
 					  <p>
 						 <label>Manager</label>
 						 <br>
-						 <select id = "myList">
+						 <select id = "myList" name='manager_names'>
 							 {% for x in manager_list %}
  							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
  							{% endfor %}
