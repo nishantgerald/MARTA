@@ -710,21 +710,31 @@ CREATE PROCEDURE s33_explore_event(IN
   PrangeL DECIMAL(6,2),
   PrangeU DECIMAL(6,2))
  BEGIN
- SELECT visitevent.EventName, visitevent.SiteName, EventPrice, event.Capacity - count(*) as TixRemaining, Count(*) as TVisits
+
+ DROP VIEW IF EXISTS user_visits;
+
+ CREATE VIEW user_visits AS
+ SELECT EventName,SiteName,StartDate,VisitorUsername, count(*) as myvisits
  FROM visitevent
- JOIN event on visitevent.EventName = event.EventName AND visitevent.SiteName = event.SiteName AND visitevent.StartDate = event.StartDate
- GROUP BY visitevent.EventName, visitevent.SiteName, visitevent.StartDate
+ GROUP BY EventName,SiteName,StartDate,VisitorUsername;
+
+ SELECT visitevent.EventName, visitevent.SiteName, EventPrice, event.Capacity - count(*) as TixRemaining, Count(*) as TVisits, user_visits.myvisits
+ FROM event
+ JOIN visitevent on visitevent.EventName = event.EventName AND visitevent.SiteName = event.SiteName AND visitevent.StartDate = event.StartDate
+ JOIN user_visits on user_visits.EventName = event.EventName AND user_visits.SiteName = event.SiteName AND user_visits.StartDate = event.StartDate
+ WHERE user_visits.Visitorusername =  UName
+ GROUP BY event.EventName, event.SiteName, event.StartDate
  HAVING count(*) BETWEEN VrangeL AND VrangeU
  AND CASE WHEN include_soldout = 'No'
  THEN TixRemaining > 0
  ELSE TixRemaining = TixRemaining END
- AND CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate) IN (
+ AND CONCAT(event.EventName,event.SiteName, event.StartDate) IN (
  SELECT CONCAT(event.EventName,event.SiteName, event.StartDate)
  FROM event
  WHERE
  CASE WHEN EName IS NULL
   THEN event.EventName = event.EventName
-  ELSE event.EventName = EName END
+  ELSE event.EventName LIKE CONCAT('%',EName,'%') END
   AND CASE WHEN SName IS NULL
   THEN event.SiteName = event.SiteName
   ELSE event.SiteName = SName END
@@ -738,20 +748,6 @@ CREATE PROCEDURE s33_explore_event(IN
     FROM visitevent WHERE VisitorUsername = UName)
   ELSE CONCAT(event.EventName,event.SiteName, event.StartDate) = CONCAT(event.EventName,event.SiteName, event.StartDate) END
   AND EventPrice BETWEEN PrangeL AND PrangeU);
- END //
-
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE s33_user_visits(IN
-  UName VARCHAR(50),
-  EName VARCHAR(50),
-  SName VARCHAR(50),
-  SDate DATE)
- BEGIN
- SELECT count(*) as myvisits
- FROM visitevent
- WHERE CONCAT(EventName,SiteName,StartDate,VisitorUsername) = CONCAT(EName,SName,SDate,UName);
  END //
 DELIMITER ;
 
@@ -769,7 +765,6 @@ CREATE PROCEDURE s34_log_event_visit(IN
 DELIMITER ;
 
 /* Screen 35 - Visitor Explore Site */
-
 DELIMITER //
 CREATE PROCEDURE s35_explore_site(IN
   UName VARCHAR(50),
@@ -794,9 +789,19 @@ CREATE PROCEDURE s35_explore_site(IN
  DROP VIEW IF EXISTS event_visit_counts;
 
  CREATE VIEW event_visit_counts AS
- SELECT  event.SiteName as SiteName, count(*) as event_visits
+ SELECT  SiteName, VisitDate count(*) as event_visits
  FROM visitevent
- GROUP BY event.SiteName;
+ GROUP BY SiteName, VisitDate;
+
+ DROP VIEW IF EXISTS total_visit_counts;
+
+ CREATE VIEW total_visit_counts AS
+ SELECT event.SiteName, (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
+ FROM site
+ LEFT JOIN site_visit_counts ON site.SiteName = site_visit_counts.SiteName
+ LEFT JOIN event_visit_counts ON site.SiteName = event_visit_counts.SiteName
+
+
 
 
  SELECT site_visit_counts.SiteName, IFNULL(site_event_counts.event_count,0), (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
@@ -812,7 +817,7 @@ CREATE PROCEDURE s35_explore_site(IN
     SELECT visitsite.SiteName
     FROM visitsite WHERE VisitorUsername = UName)
   ELSE visitsite.SiteName = visitsite.SiteName END
-  AND IFNULL(site_event_counts.event_count,0) BETWEEN ECrangeL AND ECrangeU);
+  AND IFNULL(site_event_counts.event_count,0) BETWEEN ECrangeL AND ECrangeU;
  END //
 DELIMITER ;
 
@@ -854,7 +859,7 @@ END //
 DELIMITER;
 
 /* Screen 38 - Visitor Site Detail */
-#First query for site list 
+#First query for site list
 DELIMITER //
 CREATE PROCEDURE s38_get_sites()
 BEGIN
@@ -864,4 +869,3 @@ DELIMITER;
 
 #Display Table
 CREATE PROCEDURE s38(IN
-
