@@ -6,13 +6,13 @@ from flask_table import Table, Col, ButtonCol, LinkCol
 app = Flask(__name__, template_folder='template')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
-user_email = ""
-user_type = ""
-employee_type = ""
-username = ""
-employee_info = []
-site_list = []
-transit_type_list = []
+global user_email
+global user_type
+global employee_type
+global username
+global employee_info
+global site_list
+global transit_type_list
  
 def make_db_connection():
     connection = pymysql.connect(host='localhost',
@@ -32,6 +32,11 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    global employee_type
+    global user_email
+    global password
+    global user_type
+    
     if "login" in request.form:
         user_email = request.form['username']
         password = request.form['password']
@@ -432,7 +437,7 @@ def user_take_transit():
             available_transit = TakeTransitTable(items)
             return prepare_transit_screen(available_transit)
     elif "back" in request.form: 
-        return user_type
+        #return render_template('s01_login.html')
         if user_type == "Employee":
             if employee_type == "Admin":
                 return render_template('s08_adminFunctionality.html')
