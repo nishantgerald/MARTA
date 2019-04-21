@@ -13,15 +13,14 @@
     <div class="wrapper">
         <h2>Transit Detail</h2>
         <form action="{{ url_for('visitor_transit_detail') }}" method="POST">
-			<form>
 					<div class="form-group">
 						<p>
-							 <label>Open Everyday</label>
+							 <label>Transport Type</label>
 							 <br>
-						 	<select id = "open_everyday">
-							    <option value = "marta">MARTA</option>
-						   		<option value = "bus">Bus</option>
-						   		<option value = "bike">Bike</option>
+						 	<select id = "transport" name='transport_types'>
+								{% for x in transit_type_list %}
+								<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+								{% endfor %}
 						 	</select>
 						</p>
 					</div>
