@@ -368,7 +368,11 @@ def prepare_transit_screen():
 @app.route('/user_take_transit', methods=['GET', 'POST'])
 def user_take_transit():
     if "Filter" in request.form:
-        return
+        transti_type = request.form["site_name"]
+        filters = [transit_type, site, low_price, high_price]
+        connection = make_db_connection()
+        with connection.cursor() as cursor:
+            cursor.callproc('s15_get_route', filters)
     elif "back" in request.form: 
         render_template('success.html')
 
