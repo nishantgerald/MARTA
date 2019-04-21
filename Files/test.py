@@ -395,17 +395,21 @@ def user_take_transit():
     if "Filter" in request.form:
         site = request.form["site_names"]
         if site == "Any":
-            site = "NULL";
+            site = None
         transit_type = request.form["transport_types"]
+        if transit_type == "Any":
+            transit_type = None
         low_price = request.form["min_price"]
+        if low_price == "":
+            low_price = 0
         high_price = request.form["max_price"]
+        if high_price == "":
+            high_price = 999
         filters = [transit_type, site, low_price, high_price]
-        return str(filters)
         connection = make_db_connection()
         with connection.cursor() as cursor:
             cursor.callproc('s15_get_route', filters)
             results = cursor.fetchall()
-            #return str(results) [{'Type': 'MARTA', 'Route': 'Blue', 'Price': Decimal('2.00'), 'No_of_Connected_Sites': 4}]
             items = []
             for row in results:
                 row_route = row['Route']
@@ -415,7 +419,6 @@ def user_take_transit():
                 items.append(Item(row_route, row_type, row_price, row_numSites))
             available_transit = TakeTransitTable(items)
             return prepare_transit_screen(available_transit)
-            #return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = available_transit)
     elif "back" in request.form: 
         render_template('success.html')
 
