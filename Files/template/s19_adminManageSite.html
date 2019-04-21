@@ -19,14 +19,18 @@
 						 <label>Site</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">--ALL--</option>
+							 {% for x in site_list %}
+						  <option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+						  {% endfor %}
 						 </select>
 					  </p>
 					  <p>
 						 <label>Manager</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">--ALL--</option>
+							 {% for x in manager_list %}
+ 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+ 							{% endfor %}
 						 </select>
 					  </p>
 					  <p>
