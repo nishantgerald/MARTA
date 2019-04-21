@@ -891,7 +891,7 @@ DELIMITER ;
 
 /*LogSiteVisit adds a log entry to visitsite table*/
 DELIMITER //
-CREATE PROCEDURE LogSiteVisit(IN VisitDate DATE, Name VARCHAR(50), Username VARCHAR(50))
+CREATE PROCEDURE s37_log_site_visit(IN VisitDate DATE, Name VARCHAR(50), Username VARCHAR(50))
 BEGIN
 INSERT INTO visitsite (VisitSiteDate, SiteName, VisitorUsername)
 VALUES (VisitDate, Name, Username);
@@ -905,7 +905,34 @@ CREATE PROCEDURE s38_get_sites()
 BEGIN
 SELECT DISTINCT SiteName from site;
 END //
-DELIMITER;
+DELIMITER ;
 
 #Display Table
-CREATE PROCEDURE s38(IN
+DELIMITER //
+CREATE PROCEDURE s38_display_visit_history(IN
+eName VARCHAR(100),
+sName VARCHAR(50),
+startDate DATE,
+endDate DATE)
+BEGIN
+SELECT visitevent.VisitEventDate as Date, visitevent.EventName as Event, visitevent.SiteName as Site, event.EventPrice as Price
+FROM visitEvent
+JOIN event ON visitEvent.StartDate = Event.StartDate AND visitEvent.EventName = event.EventName AND visitEvent.SiteName = Event.SiteName
+WHERE
+CASE WHEN eName IS NULL
+   THEN visitevent.EventName=visitevent.EventName
+   ELSE visitevent.EventName LIKE CONCAT('%', eName, '%') END
+   AND CASE WHEN sName IS NULL
+   THEN visitevent.SiteName=visitevent.SiteName
+   ELSE visitevent.SiteName = eName END
+   AND visitEvent.VisitEventDate BETWEEN startDate AND endDate
+UNION
+SELECT visitsite.VisitSiteDate as Date, visitsite.SiteName as Site, 0 as Price, NULL as Event
+FROM visitSite
+JOIN event ON visitSite.SiteName = Event.SiteName
+WHERE
+CASE WHEN sName IS NULL
+   THEN visitsite.SiteName=visitsite.SiteName
+   ELSE visitsite.SiteName = sName END;
+END //
+DELIMITER ;
