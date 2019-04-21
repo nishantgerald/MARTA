@@ -13,13 +13,14 @@
     <div class="wrapper">
         <h2>Explore Site</h2>
         <form action="{{ url_for('visitor_explore_site') }}" method="POST">
-			<form>
 				<div class="form-group">
 					<p>
 						 <label>Name</label>
 						 <br>
-						 <select id = "name">
-						   <option value = "1">ALL</option>
+						 <select id = "name" name='site_names'>
+							 {% for x in site_list %}
+ 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+ 							{% endfor %}
 						 </select>
 			   		 </p>
 			   		 <p>
