@@ -19,7 +19,9 @@
 						 <label>Contain Site</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">All</option>
+							{% for x in site_list %}
+							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+							{% endfor %}
 						 </select>
 					  </p>
 				</fieldset>
@@ -28,7 +30,7 @@
 						 <label>Transport Type</label>
 						 <br>
 						 <select id = "myList">
-						 	{% for x in transport_type_list %}
+						 	{% for x in transit_type_list %}
 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
 							{% endfor %}
 						 </select>
