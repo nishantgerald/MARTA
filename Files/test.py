@@ -11,6 +11,18 @@ employee_type = ""
 username = ""
 employee_info = []
 
+def make_db_connection():
+    connection = pymysql.connect(host='localhost',
+                             user='root',
+                             password='root',
+                             db='Beltline',
+                             charset='utf8mb4',
+                             cursorclass=pymysql.cursors.DictCursor)
+    return connection
+
+def close_db_connection(connection):
+    connection.close()
+
 @app.route('/')
 def index():
     return render_template('/s01_login.html')
@@ -22,6 +34,7 @@ def login():
         password = request.form['password']
 
         try:
+            connection = make_db_connection()
             with open('MARTA.sql', 'r') as sql:
                 procs = sql.read().split(';')
                 with connection.cursor() as cursor:
@@ -76,6 +89,9 @@ def login():
 
         except Exception as e:
             return str(e)
+
+        finally:
+            close_db_connection(connection)
             
     elif "register" in request.form:
         return render_template('s02_registerNavigation.html')
@@ -93,11 +109,10 @@ def register_navigation():
     elif "back" in request.form:
         return render_template('s01_login.html')
 
-#EVERYTHING UNTIL THIS POINT WORKS----------------------------------------------------
-
 @app.route('/register_user', methods=['GET', 'POST'])
 def register_user():
     if "register" in request.form:
+        connection = make_db_connection()
         username = request.form['UserName']
         password = request.form['password'] #NEED TO HASH PASSWORD
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
@@ -110,6 +125,7 @@ def register_user():
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
 
+            close_db_connection(connection)
             return "Thank you for registering! You will be able to login once your account is approved."
 
     elif "back" in request.form:
@@ -118,6 +134,7 @@ def register_user():
 @app.route('/register_visitor', methods=['GET', 'POST'])
 def register_visitor():
     if "register" in request.form:
+        connection = make_db_connection()
         username = request.form['UserName']
         password = request.form['password'] #NEED TO HASH PASSWORD
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
@@ -130,14 +147,18 @@ def register_visitor():
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
 
+            close_db_connection(connection)
             return "Thank you for registering! You will be able to login once your account is approved."
 
     elif "back" in request.form:
         return render_template('s02_registerNavigation.html')
 
+#EVERYTHING UNTIL THIS POINT WORKS----------------------------------------------------
+
 @app.route('/register_employee', methods=['GET', 'POST'])
 def register_employee():
     if "Register" in request.form:
+        connection = make_db_connection()
         username = request.form['UserName']
         password = request.form['password'] #NEED TO HASH PASSWORD
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
@@ -157,6 +178,7 @@ def register_employee():
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
 
+            close_db_connection(connection)
             return "Thank you for registering! You will be able to login once your account is approved."
 
     elif "Back" in request.form:
@@ -165,6 +187,7 @@ def register_employee():
 @app.route('/register_employee_visitor', methods=['GET', 'POST'])
 def register_employee_visitor():
     if "register" in request.form:
+        connection = make_db_connection()
         username = request.form['UserName']
         password = request.form['password'] #NEED TO HASH PASSWORD
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
@@ -184,6 +207,7 @@ def register_employee_visitor():
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
             
+            close_db_connection(connection)
             return "Thank you for registering! You will be able to login once your account is approved."
 
     elif "back" in request.form:
@@ -232,7 +256,7 @@ def admin_visitor_functionality():
     elif "view_visit_history" in request.form:
         return render_template('s38_visitorVisitHistory')
     elif "view_transit_history" in request.form:
-        return render_template('s16_userTransitHistory.html')
+        return prepare_transit_screen()
     elif "explore_site" in request.form:
         return render_template('s35_visitorExploreSite.html')
     elif "explore_event" in request.form:
@@ -329,16 +353,28 @@ def visitor_functionality():
 
 #End navigation screens-----------------------------------------
 
+def prepare_transit_screen():
+    connection = make_db_connection()
+    with connection.cursor() as site_cursor:
+        site_query = "SELECT DISTINCT SiteName FROM Beltline.site;"
+        site_cursor.execute(site_query)
+        site_list = [row for row in cursor.fetchall()]
+    with connection.cursor() as transit_cursor:
+        transit_type_query = "SELECT DISTINCT TransitType FROM Beltline.transit;"
+        transit_cursor.execute(site_query)
+        transit_type_list = [row for row in cursor.fetchall()]
+    return render_template('s15_userTakeTransit.html', site_list, transit_type_list)
+
+@app.route('/user_take_transit', methods=['GET', 'POST'])
+def user_take_transit():
+    if "Filter" in request.form:
+        return
+
+
+
 if __name__ == '__main__':
         # Connect to the database
-    connection = pymysql.connect(host='localhost',
-                             user='root',
-                             password='root',
-                             db='Beltline',
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
     app.run(debug=True)
-    connection.close()
 
 
 
