@@ -77,7 +77,25 @@ CREATE PROCEDURE s05_register_employee(IN
 DELIMITER ;
 
 /* Screen 06 - Register Employee-Visitor*/
-
+DELIMITER //
+CREATE PROCEDURE s06_register_employee_visitor(IN
+  UName VARCHAR(50),
+  Pass VARCHAR(25),
+  UType VARCHAR(50),
+  FName VARCHAR(50),
+  LName VARCHAR(50),
+  EID CHAR(9),
+  Phone VARCHAR(20),
+  EAddress VARCHAR(100),
+  ECity VARCHAR(50),
+  EState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other'),
+  EZipcode CHAR(5),
+  EType ENUM('Manager','Staff','Admin'))
+ BEGIN
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
+ END //
+DELIMITER ;
 /* Screens 7-4 - Functionality/Navigation Screens */
 
 /* Screen 15 - User Take Transit */
@@ -144,6 +162,17 @@ DELIMITER ;
 
 
 /* Screen 17 - Employee Manage Profile */
+DELIMITER //
+CREATE PROCEDURE s17_manage_profile(IN username VARCHAR(50),fname VARCHAR(50), lname VARCHAR(50), phone VARCHAR(20))
+BEGIN
+UPDATE user
+SET user.Firstname=fname,user.Lastname=lname
+WHERE user.Username=username;
+UPDATE employee
+SET employee.Phone=phone
+WHERE employee.Username=username;
+END //
+DELIMITER ;
 
 /* Screen 18 - Administrator Manage User */
 
