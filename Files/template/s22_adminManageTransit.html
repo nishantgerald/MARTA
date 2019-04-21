@@ -17,7 +17,7 @@
 					  <p>
 						 <label>Transport Type</label>
 						 <br>
-						 <select id = "transport">
+						 <select id = "transport" name='transport_types'>
 							 {% for x in transit_type_list %}
  							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
  							{% endfor %}
@@ -28,7 +28,7 @@
 					  <p>
 						 <label>Contain Site</label>
 						 <br>
-						 <select id = "site">
+						 <select id = "site" name='site_names'>
 							 {% for x in site_list %}
  							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
  							{% endfor %}
