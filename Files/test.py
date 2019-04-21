@@ -237,7 +237,7 @@ def admin_functionality():
     elif "manage_site" in request.form:
         return render_template('s19_adminManageSite.html')
     elif "take_transit" in request.form:
-        return prepare_transit_screen()
+        return prepare_transit_screen([])
     elif "view_transit_history" in request.form:
         return render_template('s16_userTransitHistory.html')
     elif "back" in request.form:
@@ -355,7 +355,7 @@ def visitor_functionality():
 
 #End navigation screens-----------------------------------------
 
-def prepare_transit_screen():
+def prepare_transit_screen(ttable):
     connection = make_db_connection()
     with connection.cursor() as site_cursor:
         site_query = "SELECT DISTINCT SiteName FROM Beltline.site;"
@@ -366,31 +366,14 @@ def prepare_transit_screen():
         transit_cursor.execute(transit_type_query)
         transit_type_list = ["Any"] + [row["TransitType"] for row in transit_cursor.fetchall()]
     close_db_connection(connection)
-    return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = [])
-
-@app.route('/user_take_transit', methods=['GET', 'POST'])
-def user_take_transit():
-    if "Filter" in request.form:
-        site = request.form["site_names"]
-        transit_type = request.form["transport_types"]
-        low_price = request.form["min_price"]
-        high_price = request.form["max_price"]
-        filters = [transit_type, site, low_price, high_price]
-        connection = make_db_connection()
-        with connection.cursor() as cursor:
-            cursor.callproc('s15_get_route', filters)
-            results = cursor.fetchall()
-            available_transit = TakeTransitTable(results)
-            return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = available_transit)
-    elif "back" in request.form: 
-        render_template('success.html')
+    return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = ttable)
 
 class TakeTransitTable(Table):
-    id = Col('Id', show=False)
+    #id = Col('Id', show=False)
     route = Col('Route')
-    transport_type = Col('Transport Type')
-    Price = Col('Price')
-    NumConnectedSites = Col('# Connected Sites')
+    ttype = Col('Transport Type')
+    price = Col('Price')
+    conn_sites = Col('# Connected Sites')
     allow_sort = True
 
     def sort_url(self, col_key, reverse=False):
@@ -399,6 +382,44 @@ class TakeTransitTable(Table):
         else:
             direction = 'asc'
         return url_for('index', sort=col_key, direction=direction)
+
+class Item(object):
+    def __init__(self, route, ttype, price, conn_sites):
+        self.route = route
+        self.ttype = ttype
+        self.price = price
+        self.conn_sites = conn_sites
+
+@app.route('/user_take_transit', methods=['GET', 'POST'])
+def user_take_transit():
+    if "Filter" in request.form:
+        site = request.form["site_names"]
+        if site == "Any":
+            site = "NULL";
+        transit_type = request.form["transport_types"]
+        low_price = request.form["min_price"]
+        high_price = request.form["max_price"]
+        filters = [transit_type, site, low_price, high_price]
+        return str(filters)
+        connection = make_db_connection()
+        with connection.cursor() as cursor:
+            cursor.callproc('s15_get_route', filters)
+            results = cursor.fetchall()
+            #return str(results) [{'Type': 'MARTA', 'Route': 'Blue', 'Price': Decimal('2.00'), 'No_of_Connected_Sites': 4}]
+            items = []
+            for row in results:
+                row_route = row['Route']
+                row_type = row['Type']
+                row_price = row['Price']
+                row_numSites = row['No_of_Connected_Sites']
+                items.append(Item(row_route, row_type, row_price, row_numSites))
+            available_transit = TakeTransitTable(items)
+            return prepare_transit_screen(available_transit)
+            #return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = available_transit)
+    elif "back" in request.form: 
+        render_template('success.html')
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
