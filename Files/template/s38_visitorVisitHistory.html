@@ -13,10 +13,18 @@
     <div class="wrapper">
         <h2>Visit History</h2>
         <form action="{{ url_for('visitor_visit_history') }}" method="POST">
-			<form>
 				<div class="form-group">
 					<label>Event</label>
 					<input type="text" name="event" class="form-control" />
+						<p>
+							 <label>Site</label>
+							 <br>
+							 <select id = "name" name='site_names'>
+								 {% for x in site_list %}
+	 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+	 							{% endfor %}
+							 </select>
+				   		 </p>
 				</div>
 
 				<div class="form-group">
@@ -28,7 +36,7 @@
 
 				<div class="form-group">
 					<br><input type="submit" class="btn btn-primary" value="Filter" name="filter" />
-				</div>	
+				</div>
 
 				<div class="form-group">
 					<br><input type="submit" class="btn btn-primary" value="Back" name="back" />
