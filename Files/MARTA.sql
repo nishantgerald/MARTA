@@ -1,4 +1,6 @@
 use Beltline;
+
+/* Screen 01 - User Login */
 DELIMITER //
 CREATE PROCEDURE s01_user_login_check_email(IN
   EMailID VARCHAR(50))
@@ -122,20 +124,29 @@ DELIMITER ;
 /*Page 33*/
 DELIMITER //
 CREATE PROCEDURE s33_explore_event(IN
+  UName VARCHAR(50),
   EName VARCHAR(50),
   Keyword VARCHAR(50),
   SName VARCHAR(50),
   SDate DATE,
   EDate DATE,
-  VrangeU DECIMAL(3,0),
+  include_visited ENUM('Yes','No'),
+  include_soldout ENUM('Yes','No'),
   VrangeL DECIMAL(3,0),
-  PrangeU DECIMAL(6,2),
-  PrangeL DECIMAL(6,2))
+  VrangeU DECIMAL(3,0),
+  PrangeL DECIMAL(6,2),
+  PrangeU DECIMAL(6,2))
  BEGIN
- SELECT visitevent.EventName, visitevent.SiteName, EventPrice, Count(*) as TVisits, event.Capacity - count(*) as TixRemaining
+
+ SELECT visitevent.EventName, visitevent.SiteName, EventPrice, event.Capacity - count(*) as TixRemaining, Count(*) as TVisits
  FROM visitevent
  JOIN event on visitevent.EventName = event.EventName AND visitevent.SiteName = event.SiteName AND visitevent.StartDate = event.StartDate
- GROUP BY visitevent.EventName, visitevent.SiteName, visitevent.StartDate HAVING count(*) BETWEEN VrangeL AND VrangeU and CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate) IN (
+ GROUP BY visitevent.EventName, visitevent.SiteName, visitevent.StartDate
+ HAVING count(*) BETWEEN VrangeL AND VrangeU
+ AND CASE WHEN include_soldout = 'No'
+ THEN TixRemaining > 0
+ ELSE TixRemaining = TixRemaining END
+ AND CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate) IN (
  SELECT CONCAT(event.EventName,event.SiteName, event.StartDate)
  FROM event
  WHERE
@@ -149,6 +160,11 @@ CREATE PROCEDURE s33_explore_event(IN
   THEN event.Description LIKE '%'
   ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
   AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
+  AND CASE WHEN include_visited = 'No'
+  THEN CONCAT(event.EventName,event.SiteName, event.StartDate) NOT IN (
+    SELECT CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate)
+    FROM visitevent WHERE VisitorUsername = UName)
+  ELSE CONCAT(event.EventName,event.SiteName, event.StartDate) = CONCAT(event.EventName,event.SiteName, event.StartDate) END
   AND EventPrice BETWEEN PrangeL AND PrangeU);
  END //
 DELIMITER ;
@@ -724,8 +740,66 @@ AND (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_v
  END //
 DELIMITER ;
 
+/* Page 30 - Manager Daily Detail */
+DELIMITER //
+CREATE PROCEDURE s30_mgr_daily_detail(IN
+  SName VARCHAR(50),
+  SDate date)
+BEGIN
 
-#EXPLORE SITE - Page 35
+CREATE VIEW
+
+END //
+DELIMITER ;
+
+/*#EXPLORE SITE - Page 35*/
+
+DELIMITER //
+CREATE PROCEDURE s35_explore_site(IN
+  UName VARCHAR(50),
+  SName VARCHAR(50),
+  include_visited ENUM('Yes','No'),
+  ECrangeL DECIMAL(7,0),
+  ECrangeU DECIMAL(7,0))
+ BEGIN
+
+ CREATE VIEW site_event_counts AS
+ SELECT SiteName, EventName, StartDate, EndDate, count(*) as num_events
+ FROM event
+ GROUP BY SiteName, EventName, StartDate, EndDate;
+
+ DROP VIEW IF EXISTS site_visit_counts;
+
+ CREATE VIEW site_visit_counts AS
+ SELECT  SiteName, VisitDate, count(*) as site_visits
+ FROM visitsite
+ GROUP BY SiteName, VisitDate;
+
+ DROP VIEW IF EXISTS event_visit_counts;
+
+ CREATE VIEW event_visit_counts AS
+ SELECT  event.SiteName as SiteName, count(*) as event_visits
+ FROM visitevent
+ GROUP BY event.SiteName;
+
+
+ SELECT site_visit_counts.SiteName, IFNULL(site_event_counts.event_count,0), (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
+ FROM site_visit_counts
+ JOIN event_visit_counts on site_visit_counts.SiteName = event_visit_counts.SiteName
+ JOIN site_event_counts on site_visit_counts.SiteName = site_event_counts.SiteName
+ WHERE
+  CASE WHEN SName IS NULL
+  THEN site_visit_counts.SiteName = site_visit_counts.SiteName
+  ELSE site_visit_counts.SiteName = SName END
+  AND CASE WHEN include_visited = 'No'
+  THEN CONCAT site_event_counts.SiteName NOT IN (
+    SELECT visitsite.SiteName
+    FROM visitsite WHERE VisitorUsername = UName)
+  ELSE visitsite.SiteName = visitsite.SiteName END
+  AND IFNULL(site_event_counts.event_count,0) BETWEEN ECrangeL AND ECrangeU);
+ END //
+DELIMITER ;
+
 
 #DELIMITER //
 #CREATE PROCEDURE SelectSite(IN OpenErrday ENUM('Yes','No'), )
@@ -754,8 +828,8 @@ VALUES (TDate, TType, Route, UserN);
 END //
 DELIMITER;
 
-#SITE DETAIL - Page 37
-#LogSiteVisit adds a log entry to visitsite table
+/*#SITE DETAIL - Page 37
+#LogSiteVisit adds a log entry to visitsite table*/
 
 DELIMITER //
 CREATE PROCEDURE LogSiteVisit(IN VisitDate DATE, Nombre VARCHAR(50), Username VARCHAR(50))
