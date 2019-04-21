@@ -163,7 +163,7 @@ def register_employee():
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
         firstname = request.form['FirstName']
         lastname = request.form['LastName']
-        phone = request.forn['phone']
+        phone = request.form['phone']
         address = request.form['address']
         city = request.form['city']
         state = request.form['state']
@@ -192,7 +192,7 @@ def register_employee_visitor():
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
         firstname = request.form['FirstName']
         lastname = request.form['LastName']
-        phone = request.forn['phone']
+        phone = request.form['phone']
         address = request.form['address']
         city = request.form['city']
         state = request.form['state']
