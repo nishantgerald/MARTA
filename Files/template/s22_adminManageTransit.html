@@ -13,7 +13,6 @@
     <div class="wrapper">
         <h2>Manage Transit</h2>
         <form action="{{ url_for('admin_manage_transit') }}" method="POST">
-			<form>
 				<fieldset>
 					  <p>
 						 <label>Transport Type</label>
@@ -40,7 +39,6 @@
 					  <label>Max Price</label>
 	                  <input type="text" name="max_price" class="form-control" />
 				</fieldset>
-				</form>
 				<div class="form-group">
 					<br>
 					<input type="submit" class="btn btn-primary" value="Filter" name="Filter" />
