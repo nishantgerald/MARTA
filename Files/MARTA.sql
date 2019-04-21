@@ -77,7 +77,25 @@ CREATE PROCEDURE s05_register_employee(IN
 DELIMITER ;
 
 /* Screen 06 - Register Employee-Visitor*/
-
+DELIMITER //
+CREATE PROCEDURE s06_register_employee_visitor(IN
+  UName VARCHAR(50),
+  Pass VARCHAR(25),
+  UType VARCHAR(50),
+  FName VARCHAR(50),
+  LName VARCHAR(50),
+  EID CHAR(9),
+  Phone VARCHAR(20),
+  EAddress VARCHAR(100),
+  ECity VARCHAR(50),
+  EState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other'),
+  EZipcode CHAR(5),
+  EType ENUM('Manager','Staff','Admin'))
+ BEGIN
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
+ END //
+DELIMITER ;
 /* Screens 7-4 - Functionality/Navigation Screens */
 
 /* Screen 15 - User Take Transit */
@@ -878,7 +896,7 @@ BEGIN
 INSERT INTO visitsite (VisitSiteDate, SiteName, VisitorUsername)
 VALUES (VisitDate, Name, Username);
 END //
-DELIMITER ;
+DELIMITER;
 
 /* Screen 38 - Visitor Site Detail */
 #First query for site list
@@ -887,34 +905,7 @@ CREATE PROCEDURE s38_get_sites()
 BEGIN
 SELECT DISTINCT SiteName from site;
 END //
-DELIMITER ;
+DELIMITER;
 
 #Display Table
-DELIMITER //
-CREATE PROCEDURE s38_display_visit_history(IN
-eName VARCHAR(100),
-sName VARCHAR(50),
-startDate DATE,
-endDate DATE)
-BEGIN
-SELECT visitevent.VisitEventDate as Date, visitevent.EventName as Event, visitevent.SiteName as Site, event.EventPrice as Price
-FROM visitEvent
-JOIN event ON visitEvent.StartDate = Event.StartDate AND visitEvent.EventName = event.EventName AND visitEvent.SiteName = Event.SiteName
-WHERE
-CASE WHEN eName IS NULL
-   THEN visitevent.EventName=visitevent.EventName
-   ELSE visitevent.EventName LIKE CONCAT('%', eName, '%') END
-   AND CASE WHEN sName IS NULL
-   THEN visitevent.SiteName=visitevent.SiteName
-   ELSE visitevent.SiteName = eName END
-   AND visitEvent.VisitEventDate BETWEEN startDate AND endDate
-UNION
-SELECT visitsite.VisitSiteDate as Date, visitsite.SiteName as Site, 0 as Price, NULL as Event
-FROM visitSite
-JOIN event ON visitSite.SiteName = Event.SiteName
-WHERE
-CASE WHEN sName IS NULL
-   THEN visitsite.SiteName=visitsite.SiteName
-   ELSE visitsite.SiteName = sName END;
-END //
-DELIMITER ;
+CREATE PROCEDURE s38(IN
