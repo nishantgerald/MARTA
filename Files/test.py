@@ -58,6 +58,7 @@ def login():
                             return "Sorry, your account is not approved for login"
                 else:
                     return "ERROR: Invalid Username"
+
                 if user_type == "Employee":
                     with connection.cursor() as cursor3:
                         cursor3.callproc('s01_employee_check_type', [user_email])
@@ -373,7 +374,7 @@ class TakeTransitTable(Table):
     ttype = Col('Transport Type')
     price = Col('Price')
     conn_sites = Col('# Connected Sites')
-    log_transit = LinkCol('Log Transit', 'log_transit', url_kwargs=dict(route="route"))
+    edit = LinkCol('Edit', 'edit', url_kwargs=dict(route="route"))
     allow_sort = True
 
     def sort_url(self, col_key, reverse=False):
@@ -431,6 +432,7 @@ def user_take_transit():
             available_transit = TakeTransitTable(items)
             return prepare_transit_screen(available_transit)
     elif "back" in request.form: 
+        return user_type
         if user_type == "Employee":
             if employee_type == "Admin":
                 return render_template('s08_adminFunctionality.html')
@@ -438,17 +440,18 @@ def user_take_transit():
                 return render_template('s10_managerFunctionality.html')
             elif employee_type == "Staff":
                 return render_template('s12_staffFunctionality.html')
-        elif user_type == "Employee, Visitor":
-            if employee_type == "Admin":
-                return render_template('s09_adminVisitorFunctionality.html')
-            elif employee_type == "Manager":
-                return render_template('s11_managerVisitorFunctionality.html')
-            elif employee_type == "Staff":
-                return render_template('s13_staffVisitorFunctionality.html')
+            elif user_type == "Employee, Visitor":
+                if employee_type == "Admin":
+                    return render_template('s09_adminVisitorFunctionality.html')
+                elif employee_type == "Manager":
+                    return render_template('s11_managerVisitorFunctionality.html')
+                elif employee_type == "Staff":
+                    return render_template('s13_staffVisitorFunctionality.html')
         elif user_type == "Visitor":
             return render_template('s14_visitorFunctionality')
         elif user_type == "User":
             return render_template('s07_userFunctionality')
+
 
 
 if __name__ == '__main__':
