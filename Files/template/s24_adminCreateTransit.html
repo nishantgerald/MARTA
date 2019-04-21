@@ -18,11 +18,12 @@
     <div class="wrapper">
         <h2>Create Transit</h2>
         <form action="{{ url_for('admin_create_transit') }}" method="POST">
-			<form>
 				<p>
 				   <label>Transport Type</label>
-				   <select id = "myList">
-						 <option value = "1">--ALL--</option>
+				   <select id = "myList" name='transport_types'>
+					   {% for x in transit_type_list %}
+					   <option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+					   {% endfor %}
 				   </select>
 				</p>
 					 <label>Route</label>
@@ -39,7 +40,6 @@
 						  <option value="James's">Placeholder 5</option>
 						  <option value="Lesser">Placeholder 6</option>
 					  </select>
-
 
         		<div class="form-group">
 					<br>
