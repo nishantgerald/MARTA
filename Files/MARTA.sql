@@ -328,9 +328,9 @@ DELIMITER ;
 
 /*CREATE SITE - PAGE 21 CreateSite adds a new site entry into site table*/
 
-/* Page 20 - Edit Site*/
+/* Page 21 - Edit Site*/
 DELIMITER //
-CREATE PROCEDURE s20_create_site(IN
+CREATE PROCEDURE s21_create_site(IN
   SName VARCHAR(50),
   SAddress VARCHAR(50),
   SZipcode CHAR(5),
@@ -386,7 +386,7 @@ END //
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE DeleteTransit(IN
+CREATE PROCEDURE s22_delete_transit(IN
   TType ENUM('MARTA','Bus','Bike'),
   Route VARCHAR(20))
 BEGIN
@@ -396,21 +396,26 @@ END //
 DELIMITER;
 
 
-/*EDIT EVENT - Page 23
+/*Edit transit- Page 23
 #RemoveSites removes all entries matching the entered route num
 #EditTransit re adds rows corresponding to the newly entered sites
 #EditPrice updates price if it is changed in transit table*/
 
 DELIMITER //
-CREATE PROCEDURE RemoveSites(IN Route VARCHAR(20))
+CREATE PROCEDURE s23_delete_sites(IN
+  TType ENUM('MARTA','Bus','Bike'),
+  Route VARCHAR(20))
 BEGIN
 DELETE FROM connect
-WHERE connect.TransitRoute = Route;
+WHERE connect.TransitRoute = Route AND connect.TransitType = TType;
 END //
 DELIMITER;
 
 DELIMITER //
-CREATE PROCEDURE EditTransit(IN Route VARCHAR(20), TType ENUM('MARTA','Bus','Bike'), Site_Name VARCHAR(20))
+CREATE PROCEDURE s23_add_sites(
+  IN Route VARCHAR(20),
+  TType ENUM('MARTA','Bus','Bike'),
+  Site_Name VARCHAR(20))
 BEGIN
 INSERT INTO connect (TransitType, TransitRoute, SiteName)
 VALUES (TType, Route, Site_Name);
@@ -418,103 +423,181 @@ VALUES (TType, Route, Site_Name);
 DELIMITER;
 
 DELIMITER //
-CREATE PROCEDURE EditPrice(IN Price DECIMAL(7,2), Route VARCHAR(20))
+CREATE PROCEDURE s23_edit_price(IN
+  TType ENUM('MARTA','Bus','Bike'),
+  Price DECIMAL(7,2),
+  Route VARCHAR(20))
 BEGIN
 UPDATE transit
 SET transit.TransitPrice = Price
-WHERE transit.TransitRoute = Route;
+WHERE connect.TransitRoute = Route AND connect.TransitType = TType;
 END //
 DELIMITER;
 
-#CREATE TRANSIT - Page 24
-#CreateTransit creates a new transit entry in the transit table
 DELIMITER //
-CREATE PROCEDURE CreateTransit(IN TType ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), Price DECIMAL(7,2))
+CREATE PROCEDURE s23_edit_route(IN
+  TType ENUM('MARTA','Bus','Bike'),
+  OldRoute VARCHAR(20),
+  Route VARCHAR(20))
+BEGIN
+UPDATE transit
+SET transit.TransitRoute = Route
+WHERE connect.TransitRoute = OldRoute AND connect.TransitType = TType;
+END //
+DELIMITER;
+
+/* Page 24 Create Transit */
+DELIMITER //
+CREATE PROCEDURE s24_create_transit(IN
+  TType ENUM('MARTA','Bus','Bike'),
+  Route VARCHAR(20),
+  Price DECIMAL(7,2))
 BEGIN
 INSERT INTO transit(TransitType, TransitRoute, TransitPrice)
 VALUES (TType, Route, Price);
 END //
 DELIMITER;
 
-#~~Use EditTransit procedure above to add connected sites~~
 
-#MANAGE EVENT - Page 25
+/*#MANAGE EVENT - Page 25
 #CreateEvent adds a new event to the event table
 #DeleteEvents deletes and event
 #Duration calculates the length of the event in days
 #TotalVisits return number of visits to that site
 #StaffCount returns number of staff assigned to site
-#Total revenue calculated by multiplying visits by price
+#Total revenue calculated by multiplying visits by price*/
+DELIMITER //
+CREATE PROCEDURE s25_manage_event(IN
+  EName VARCHAR(50),
+  Keyword VARCHAR(50),
+  SName VARCHAR(50),
+  SDate DATE,
+  EDate DATE,
+  DrangeL DECIMAL (7,0),
+  DrangeU DECIMAL (7,0),
+  DurangeL DECIMAL (7,0),
+  DurangeU DECIMAL (7,0),
+  VrangeL DECIMAL (7,0),
+  VrangeU DECIMAL (7,0),
+  RrangeL DECIMAL(7,2),
+  RrangeU DECIMAL(7,2))
+BEGIN
 
+DROP VIEW IF EXISTS event_visit_counts;
+
+CREATE VIEW event_visit_counts AS
+SELECT event.EventName, event.SiteName, event.StartDate, count(*) AS total_visits, DATEDIFF(event.EndDate,event.StartDate) as duration, count(*)*event.EventPrice as revenue
+FROM event
+JOIN visitevent ON event.EventName = visitevent.EventName AND event.SiteName = visitevent.SiteName AND event.StartDate = visitevent.StartDate
+GROUP BY event.EventName, event.SiteName, event.StartDate, event.EndDate;
+
+DROP VIEW IF EXISTS event_staff_counts;
+
+CREATE VIEW event_staff_counts AS
+SELECT event.EventName, event.SiteName, event.StartDate, count(*) AS num_staff
+FROM event
+JOIN staff_assignment ON event.EventName = staff_assignment.EventName AND event.SiteName = staff_assignment.SiteName AND event.StartDate = staff_assignment.StartDate
+GROUP BY event.EventName, event.SiteName, event.StartDate;
+
+SELECT event.EventName, event_staff_counts.num_staff, event_visit_counts.duration, event_visit_counts.total_visits, event_visit_counts.revenue
+FROM event
+JOIN event_staff_counts ON event.EventName = event_staff_counts.EventName AND event.SiteName = event_staff_counts.SiteName AND event.StartDate = event_staff_counts.StartDate
+JOIN event_visit_counts ON event.EventName = event_visit_counts.EventName AND event.SiteName = event_visit_counts.SiteName AND event.StartDate = event_visit_counts.StartDate
+GROUP BY event.EventName, event.SiteName, event.StartDate HAVING CONCAT(event.EventName, event.SiteName, event.StartDate) IN(
+SELECT CONCAT(event.EventName, event.SiteName, event.StartDate)
+FROM event
+JOIN event_visit_counts ON event.EventName = event_visit_counts.EventName AND event.SiteName = event_visit_counts.SiteName AND event.StartDate = event_visit_counts.StartDate
+WHERE
+CASE WHEN EName IS NULL
+ THEN event.EventName=event.EventName
+ ELSE event.EventName = EName END
+ AND CASE WHEN Keyword IS NULL
+ THEN event.Description LIKE '%'
+ ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
+ AND event.SiteName = SName
+ AND event_visit_counts.revenue BETWEEN RrangeL AND RrangeU
+ AND event_visit_counts.total_visits BETWEEN VrangeL AND VrangeU
+ AND event_visit_counts.duration BETWEEN DurangeL AND DurangeU
+ AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate));
+
+ END //
+DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE DeleteEvent(IN Nombre VARCHAR(100), StartD Date, EndD Date)
+CREATE PROCEDURE DeleteEvent(IN
+  EName VARCHAR(50),
+  SName VARCHAR(50),
+  SDate Date)
 BEGIN
 DELETE FROM event
-WHERE EventName = Nombre and StartDate = StartD and EndDate = EndD;
+WHERE EventName = EName and StartDate = SDate and SiteName = SName;
 END //
 DELIMITER;
 
-DELIMITER  //
-CREATE PROCEDURE Duration(IN StartD Date, EndD Date)
-BEGIN
-SELECT DATEDIFF(StartD, EndD) as DateDifference;
-END //
-DELIMITER;
 
-DELIMITER //
-CREATE PROCEDURE TotalVisits(IN Nombre VARCHAR(100))
-BEGIN
-SELECT COUNT(*) FROM visitevent
-WHERE EventName = Nombre;
-END //
-DELIMITER;
-
-DELIMITER //
-CREATE PROCEDURE StaffCount(IN Nombre VARCHAR(100), StartD Date)
-BEGIN
-SELECT COUNT(*)
-FROM staff_assignment
-WHERE EventName = Nombre and StartDate = StartD;
-END //
-DELIMITER;
-
-#VIEW/EDIT EVENT - Page 26
+/*#VIEW/EDIT EVENT - Page 26
 #RemoveStaff removes staff entry from staff_assignment table
 #AddStaff adds staff entry to staff_assignment table
-#UpdateDescription updates description in event table
-
+#UpdateDescription updates description in event table*/
 DELIMITER //
-CREATE PROCEDURE RemoveStaff(IN Nombre VARCHAR(100), StartD Date, EmployeeName VARCHAR(50))
+CREATE PROCEDURE RemoveStaff(IN
+  EName VARCHAR(50),
+  SName VARCHAR(50),
+  SDate Date,
+  Fname VARCHAR(50),
+  Lname VARCHAR(50))
 BEGIN
+SET @Staffname=(SELECT UserName FROM user WHERE user.Firstname=Fname AND user.Lastname=Lname);
 DELETE FROM staff_assignment
-WHERE EventName = Nombre and StartDate = StartD and EmployeeName = StaffUsername;
+WHERE EventName = EName AND StartDate = SDate AND SiteName = SName AND StaffUsername = @Staffname;
 END //
 DELIMITER;
 
 DELIMITER //
-CREATE PROCEDURE AddStaff(IN Nombre VARCHAR(100), StartD Date, EmployeeName VARCHAR(50), Site VARCHAR(50))
+CREATE PROCEDURE AddStaff(IN
+  EName VARCHAR(50),
+  SName VARCHAR(50),
+  SDate Date,
+  Fname VARCHAR(50),
+  Lname VARCHAR(50))
 BEGIN
+SET @Staffname=(SELECT UserName FROM user WHERE user.Firstname=Fname AND user.Lastname=Lname);
 INSERT INTO staff_assignment(StaffUsername, EventName, SiteName, StartDate)
-VALUES (EmployeeName, Nombre, Site, StartD);
+VALUES (@Staffname, EName, SName, SDate);
 END //
 DELIMITER;
 
 DELIMITER //
-CREATE PROCEDURE UpdateDescription(IN Nombre VARCHAR(100), StartD Date, Site VARCHAR(50), Descr VARCHAR(1000))
+CREATE PROCEDURE UpdateDescription(IN
+  EName VARCHAR(50),
+  SName VARCHAR(50),
+  SDate Date,
+  Descr VARCHAR(1000))
 BEGIN
 UPDATE event
 SET Description = Descr
-WHERE EventName = Nombre and StartDate = StartD and SiteName = Site;
+WHERE EventName = EName and StartDate = SDate and SiteName = SName;
 END //
 DELIMITER;
 
 /* Page 27 - Create Event */
 
 DELIMITER //
-CREATE PROCEDURE 27_staff_avail(IN SDate date)
-SELECT StaffUsername FROM staff_assignment
-WHERE SDate <> StartDate;
+CREATE PROCEDURE s27_staff_avail(IN
+  SDate date,
+  EDate date)
+  BEGIN
+  SELECT CONCAT(Firstname,' ',Lastname)
+  FROM user
+  WHERE Username NOT IN (
+    SELECT DISTINCT StaffUsername
+    FROM staff_assignment
+    JOIN event ON event.EventName = staff_assignment.EventName AND event.SiteName = staff_assignment.SiteName AND event.StartDate = staff_assignment.StartDate
+    WHERE staff_assignment.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate )
+	AND Username IN (
+	  SELECT Username
+    FROM employee
+    WHERE EmployeeType = 'Staff');
 END //
 DELIMITER ;
 
@@ -528,40 +611,119 @@ VALUE(Name, SDate, EDate, Price, ECapacity, MinStaff, EDescr, SName);
 END //
 DELIMITER ;
 
-DELIMITER //
-/* Need EMPLOYEE Fname and Lname (WORKING!) */
-CREATE PROCEDURE 28_mgr_manage_staff(IN SName VARCHAR(50), EmpID CHAR(9), SDate date, EDate date)
-BEGIN
-	/* Need COUNT and all NULL conditions */
-	IF EmpID IS NULL THEN
-		SELECT *
-        FROM (
-			SELECT CONCAT(Firstname, ' ', Lastname)
-			FROM user
-			WHERE Username IN(
-			SELECT StaffUsername
-			FROM staff_assignment
-			WHERE (staff_assignment.StartDate BETWEEN SDate AND EDate)
-			AND SName = staff_assignment.SiteName))) AS 'Staff Name'
-		INNER JOIN (SELECT COUNT(*)
-			FROM staff_assignment
-            WHERE (staff_assignment.StartDate BETWEEN SDate AND EDate)
-            AND SName = staff_assignment.SiteName)AS 'Event Count';
-        /*
-        COUNT(*) FROM staff_assignment
 
-        WHERE (staff_assignment.StartDate BETWEEN SDate AND Edate) AND SName = staff_assignment.SiteName; */
-        /*GROUP BY StaffUserName; */
-	ELSE
-		/* Needs complete adjustment. Not functioning*/
-		SELECT
-		(SELECT DISTINCT StaffUsername FROM staff_assignment
-        WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Staff Name',
-        (SELECT COUNT(StaffUsername) FROM staff_assignment
-        WHERE EmpID = staff_assignment.StaffUsername AND SDate = staff_assignment.StartDate AND SName = staff_assignment.SiteName) as 'Event Shifts';
-	END IF;
+/*Page 28 - Manager View/Manage staff */
+DELIMITER //
+CREATE PROCEDURE s28_mgr_manage_staff(IN
+  SName VARCHAR(50),
+  Fname VARCHAR(50),
+  Lname VARCHAR(50),
+  SDate date,
+  EDate date)
+BEGIN
+
+  SELECT CONCAT(user.Firstname,' ',user.Lastname) AS staff_name, count(*) AS num_shifts
+  FROM staff_assignment
+  JOIN user ON staff_assignment.StaffUsername = user.Username
+  JOIN event ON event.EventName = staff_assignment.EventName AND event.SiteName = staff_assignment.SiteName AND event.StartDate = staff_assignment.StartDate
+  WHERE staff_assignment.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate
+  GROUP BY user.Firstname, user.Lastname HAVING CONCAT(user.Firstname, user.Lastname) IN (
+    SELECT CONCAT(user.Firstname, user.Lastname)
+    FROM staff_assignment
+    JOIN user ON staff_assignment.StaffUsername = user.Username
+    WHERE
+    CASE WHEN SName IS NULL
+    THEN staff_assignment.SiteName=staff_assignment.SiteName
+    ELSE staff_assignment.SiteName = SName END
+    AND CASE WHEN FName IS NULL
+    THEN user.Firstname=user.Firstname
+    ELSE user.Firstname = Fname END
+    AND CASE WHEN LName IS NULL
+    THEN user.Lastname=user.Lastname
+    ELSE user.Lastname = Lname END);
+
 END //
 DELIMITER ;
+
+
+/* Page 29 - Manager Site Report */
+DELIMITER //
+CREATE PROCEDURE s29_manager_site_report(IN
+  SName VARCHAR(50),
+  SDate DATE,
+  EDate DATE,
+  ECrangeL DECIMAL (7,0),
+  ECrangeU DECIMAL (7,0),
+  SCrangeL DECIMAL (7,0),
+  SCrangeU DECIMAL (7,0),
+  VrangeL DECIMAL (7,0),
+  VrangeU DECIMAL (7,0),
+  RrangeL DECIMAL(7,2),
+  RrangeU DECIMAL(7,2))
+BEGIN
+
+/* Creating required views */
+DROP VIEW IF EXISTS site_event_counts;
+
+CREATE VIEW site_event_counts AS
+SELECT SiteName, StartDate, EndDate, count(*) as num_events
+FROM event
+GROUP BY SiteName, StartDate, EndDate, SiteName;
+
+DROP VIEW IF EXISTS site_visit_counts;
+
+CREATE VIEW site_visit_counts AS
+SELECT  SiteName, VisitSiteDate as VisitDate , count(*) as site_visits
+FROM visitsite
+GROUP BY SiteName,VisitSiteDate;
+
+DROP VIEW IF EXISTS event_visit_counts;
+
+CREATE VIEW event_visit_counts AS
+SELECT  event.SiteName as SiteName, visitevent.VisitEventDate as VisitDate, count(*) as event_visits, count(*)*event.EventPrice as revenue
+FROM event
+JOIN visitevent ON event.EventName = visitevent.EventName AND event.SiteName = visitevent.SiteName AND event.StartDate = visitevent.StartDate
+GROUP BY event.EventName, event.SiteName, event.StartDate, event.EndDate,visitevent.VisitEventDate;
+
+DROP VIEW IF EXISTS daily_event_visits;
+
+CREATE VIEW daily_event_visits AS
+SELECT SiteName, VisitDate, SUM(event_visits)as event_visits, SUM(revenue)as revenue
+FROM event_visit_counts
+GROUP BY SiteName, VisitDate;
+
+DROP VIEW IF EXISTS site_staff_counts;
+
+CREATE VIEW site_staff_counts AS
+SELECT event.SiteName as SiteName, event.StartDate as StartDate, event.EndDate as EndDate, count(*) AS num_staff
+FROM event
+JOIN staff_assignment ON event.EventName = staff_assignment.EventName AND event.SiteName = staff_assignment.SiteName AND event.StartDate = staff_assignment.StartDate
+GROUP BY event.SiteName, event.StartDate, event.EndDate;
+/* Created required views */
+
+SELECT site_visit_counts.VisitDate,  (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) as total_visits, IFNULL(daily_event_visits.revenue,0) as revenue, IFNULL(site_staff_counts.num_staff,0) as staff_count, IFNULL(site_event_counts.num_events,0) as event_count
+FROM site_visit_counts
+LEFT JOIN site_staff_counts ON site_visit_counts.SiteName = site_staff_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_staff_counts.StartDate and site_staff_counts.EndDate
+LEFT JOIN site_event_counts ON site_visit_counts.SiteName = site_event_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_event_counts.StartDate and site_event_counts.EndDate
+RIGHT JOIN daily_event_visits ON daily_event_visits.SiteName = site_visit_counts.SiteName AND daily_event_visits.VisitDate = site_visit_counts.VisitDate
+WHERE site_visit_counts.SiteName = SName
+AND site_visit_counts.VisitDate BETWEEN SDate AND EDate
+AND IFNULL(daily_event_visits.revenue,0) BETWEEN RrangeL AND RrangeU
+AND (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) BETWEEN VrangeL AND VrangeU
+UNION
+SELECT site_visit_counts.VisitDate,  (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) as total_visits, IFNULL(daily_event_visits.revenue,0) as revenue, IFNULL(site_staff_counts.num_staff,0) as staff_count, IFNULL(site_event_counts.num_events,0) as event_count
+FROM site_visit_counts
+LEFT JOIN site_staff_counts ON site_visit_counts.SiteName = site_staff_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_staff_counts.StartDate and site_staff_counts.EndDate
+LEFT JOIN site_event_counts ON site_visit_counts.SiteName = site_event_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_event_counts.StartDate and site_event_counts.EndDate
+LEFT JOIN daily_event_visits ON daily_event_visits.SiteName = site_visit_counts.SiteName AND daily_event_visits.VisitDate = site_visit_counts.VisitDate
+WHERE site_visit_counts.SiteName = SName
+AND site_visit_counts.VisitDate BETWEEN SDate AND EDate
+AND IFNULL(daily_event_visits.revenue,0) BETWEEN RrangeL AND RrangeU
+AND (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) BETWEEN VrangeL AND VrangeU;
+
+ END //
+DELIMITER ;
+
 
 #EXPLORE SITE - Page 35
 
