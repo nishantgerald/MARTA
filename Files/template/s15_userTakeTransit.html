@@ -13,7 +13,7 @@
     <div class="wrapper">
         <h2>User Take Transit</h2>
         <form action="{{ url_for('user_take_transit') }}" method="POST">
-			<form>
+			
 				<fieldset>
 					  <p>
 						 <label>Contain Site</label>
@@ -36,7 +36,7 @@
 						 </select>
 					  </p>
 				</fieldset>
-			</form>
+			
 			<div class="form-group">
                 <label>Min Price</label>
                 <input type="text" name="min_price" class="form-control" />
@@ -45,6 +45,9 @@
                 <input type="text" name="max_price" class="form-control" />
 
 				<input type="submit" class="btn btn-primary" value="Filter" name="Filter" />
+			</div>
+			<div class="table">
+				{{ take_transit_table }}
 			</div>
             <div class="form-group">
 				<label>Transit Date</label>

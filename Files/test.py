@@ -1,16 +1,17 @@
 import pymysql.cursors
 from flask import Flask, session, redirect, url_for, escape, request, render_template, jsonify
 import json
+from flask_table import Table, Col
 
-from flask import Flask
 app = Flask(__name__, template_folder='template')
+app.config['TEMPLATES_AUTO_RELOAD'] = True
 
 user_email = ""
 user_type = ""
 employee_type = ""
 username = ""
 employee_info = []
-
+ 
 def make_db_connection():
     connection = pymysql.connect(host='localhost',
                              user='root',
@@ -153,8 +154,6 @@ def register_visitor():
     elif "back" in request.form:
         return render_template('s02_registerNavigation.html')
 
-#EVERYTHING UNTIL THIS POINT WORKS----------------------------------------------------
-
 @app.route('/employee', methods=['GET', 'POST'])
 def register_employee():
     if "Register" in request.form:
@@ -213,7 +212,7 @@ def register_employee_visitor():
     elif "back" in request.form:
         return render_template('s02_registerNavigation.html')
 
-#Navigation (below screens) work!!!--------------------------------------
+#N\Start navigation screens--------------------------------------
 
 @app.route('/user_functionality', methods=['GET', 'POST'])
 def user_functionality():
@@ -235,7 +234,7 @@ def admin_functionality():
     elif "manage_site" in request.form:
         return render_template('s19_adminManageSite.html')
     elif "take_transit" in request.form:
-        return render_template('s15_userTakeTransit.html')
+        return prepare_transit_screen()
     elif "view_transit_history" in request.form:
         return render_template('s16_userTransitHistory.html')
     elif "back" in request.form:
@@ -256,7 +255,7 @@ def admin_visitor_functionality():
     elif "view_visit_history" in request.form:
         return render_template('s38_visitorVisitHistory')
     elif "view_transit_history" in request.form:
-        return prepare_transit_screen()
+        return render_template('s15_userTakeTransit.html')
     elif "explore_site" in request.form:
         return render_template('s35_visitorExploreSite.html')
     elif "explore_event" in request.form:
@@ -358,25 +357,29 @@ def prepare_transit_screen():
     with connection.cursor() as site_cursor:
         site_query = "SELECT DISTINCT SiteName FROM Beltline.site;"
         site_cursor.execute(site_query)
-        site_list = [row for row in cursor.fetchall()]
+        site_list = ["Any"] + [row["SiteName"] for row in site_cursor.fetchall()]
     with connection.cursor() as transit_cursor:
         transit_type_query = "SELECT DISTINCT TransitType FROM Beltline.transit;"
-        transit_cursor.execute(site_query)
-        transit_type_list = [row for row in cursor.fetchall()]
+        transit_cursor.execute(transit_type_query)
+        transit_type_list = ["Any"] + [row["TransitType"] for row in transit_cursor.fetchall()]
     close_db_connection(connection)
-    return render_template('s15_userTakeTransit.html', site_list, transit_type_list)
+    return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = [])
 
 @app.route('/user_take_transit', methods=['GET', 'POST'])
 def user_take_transit():
     if "Filter" in request.form:
         return
-    elif "back" in request.form:
-        render.template('success.html')
+    elif "back" in request.form: 
+        render_template('success.html')
 
-
+class TakeTransitTable(Table):
+    id = Col('Id', show=False)
+    route = Col('Route')
+    transport_type = Col('Transport Type')
+    Price = Col('Price')
+    NumConnectedSites = Col('# Connected Sites')
 
 if __name__ == '__main__':
-        # Connect to the database
     app.run(debug=True)
 
 
