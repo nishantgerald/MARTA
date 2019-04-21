@@ -19,7 +19,7 @@
 						 <label>Transport Type</label>
 						 <br>
 						 <select id = "myList">
-							 {% for x in type_list %}
+							 {% for x in transit_type_list %}
  							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
  							{% endfor %}
 						 </select>
