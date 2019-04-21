@@ -21,12 +21,11 @@
         <form action="{{ url_for('admin_edit_transit') }}" method="POST">
 			<form>
 					 <label>Route</label>
-					 <input type="text" name="start_date" class="form-control" />
+					 <input type="text" name="start_date" class="form-control" required/>
 					 <label>Price ($)</label>
-					 <input type="text" name="end_date" class="form-control" />
+					 <input type="text" name="end_date" class="form-control" required/>
 					 <label>Connected Sites:</label>
-					 <select multiple size="6">
-
+					 <select multiple size="6" required>
 						 <option value="American">Placeholder 1</option>
 						 <option value="Andean">Placeholder 2</option>
 						 <option value="Chilean">Placeholder 3</option>
@@ -38,7 +37,7 @@
 
         		<div class="form-group">
 					<br>
-				<input type="submit" class="btn btn-primary" value="Back" name="back" />
+				<input type="submit" class="btn btn-primary" value="Back" name="back" formnovalidate/>
 				<input type="submit" class="btn btn-primary" value="Update" name="update" />
             	</div>
         </form>

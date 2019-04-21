@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -26,11 +26,11 @@
 				   </select>
 				</p>
 					 <label>Route</label>
-					 <input type="text" name="start_date" class="form-control" />
+					 <input type="text" name="start_date" class="form-control" required/>
 					 <label>Price ($)</label>
-					 <input type="text" name="end_date" class="form-control" />
+					 <input type="text" name="end_date" class="form-control" required/>
 					 <label>Connected Sites:</label>
-					 <select multiple size="6">
+					 <select multiple size="6" required>
 
 						 <option value="American">Placeholder 1</option>
 						 <option value="Andean">Placeholder 2</option>
@@ -43,7 +43,7 @@
 
         		<div class="form-group">
 					<br>
-				<input type="submit" class="btn btn-primary" value="Back" name="back" />
+				<input type="submit" class="btn btn-primary" value="Back" name="back" formnovalidate/>
 				<input type="submit" class="btn btn-primary" value="Create" name="create" />
             	</div>
         </form>

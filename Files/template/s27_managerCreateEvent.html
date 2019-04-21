@@ -21,29 +21,29 @@
 
 			<form>
 				 <label>Name</label>
-				<input type="text" name="name" class="form-control" />
+				<input type="text" name="name" class="form-control" required/>
 			</form>
 			<form>
 				<label>Price ($)</label>
-			   <input type="text" name="price" class="form-control" />
+			   <input type="text" name="price" class="form-control" required/>
 			   <label>Capacity</label>
-			   <input type="text" name="capacity" class="form-control" />
+			   <input type="text" name="capacity" class="form-control" required/>
 			   <label>Min Staff Required</label>
-			   <input type="text" name="min_staff" class="form-control" />
+			   <input type="text" name="min_staff" class="form-control" required/>
 		   </form>
 		   <form>
 			   <label>Start Date</label>
-			  <input type="text" name="start_date" class="form-control" />
+			  <input type="text" name="start_date" class="form-control" required/>
 			  <label>End Date</label>
-			  <input type="text" name="end_date" class="form-control" />
+			  <input type="text" name="end_date" class="form-control" required/>
 		  </form>
 		  <label>Description</label>
-		  <input type="text" name="description" class="form-control" />
+		  <input type="text" name="description" class="form-control" required/>
 
 
 
 			<label>Assign Staff</label>
-		   <select multiple size="6">
+		   <select multiple size="6" required>
 
 			   <option value="p1">Placeholder 1</option>
 			   <option value="p2">Placeholder 2</option>
@@ -55,7 +55,7 @@
 		</form>
 		<form>
 			<br>
-			   <input type="submit" class="btn btn-primary" value="Back" name="back" />
+			   <input type="submit" class="btn btn-primary" value="Back" name="back" formnovalidate/>
 			   <input type="submit" class="btn btn-primary" value="Create" name="create" />
 
         </form>

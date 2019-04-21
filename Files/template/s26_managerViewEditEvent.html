@@ -18,9 +18,9 @@
     <div class="wrapper">
         <h2>View/Edit Event</h2>
         <form action="{{ url_for('manager_view_edit_event') }}" method="POST">
-	
+
 				<label>Staff Assigned:</label>
-				<select multiple size="6">
+				<select multiple size="6" required>
 
 					<option value="p1">Placeholder 1</option>
 					<option value="p2">Placeholder 2</option>
@@ -31,7 +31,7 @@
 				 </select>
 
 				  <label>Description:</label>
-				 <input type="text" name="description" class="form-control" />
+				 <input type="text" name="description" class="form-control" required/>
 				 <label>Daily Visits Min:</label>
 				<input type="text" name="daily_visits_min" class="form-control" />
 				<label>Daily Visits Max:</label>
@@ -41,12 +41,12 @@
 			  <label>Daily Revenue Max:</label>
 			 <input type="text" name="daily_revenue_min" class="form-control" />
 				<div class="form-group">
-					<br><input type="submit" class="btn btn-primary" value="Filter" name="filter" />
+					<br><input type="submit" class="btn btn-primary" value="Filter" name="filter" formnovalidate/>
 					<input type="submit" class="btn btn-primary" value="Update" name="update" />
 				</div>
 
         		<div class="form-group">
-				<input type="submit" class="btn btn-primary" value="Back" name="back" />
+				<input type="submit" class="btn btn-primary" value="Back" name="back" formnovalidate/>
             	</div>
         </form>
     </div>
