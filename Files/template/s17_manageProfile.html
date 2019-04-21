@@ -16,15 +16,15 @@
             <div class="form-group">
                 <p>
                 <label>First Name</label>
-                <input type="text" name="FirstName" class="form-control" />
+                <input type="text" name="FirstName" class="form-control" required/>
                 <label>Last Name</label>
-                <input type="text" name="LastName" class="form-control" />
+                <input type="text" name="LastName" class="form-control" required/>
                 </p>
             </div>
 
 			<div class="form-group">
                 <label>Phone</label>
-                <input type="text" name="phone" class="form-control" />
+                <input type="text" name="phone" class="form-control" required/>
             </div>
 			<div class="form-group">
                 <label>Address</label>
@@ -33,14 +33,14 @@
             </div>
             <div class="form-group">
                 <label>Email</label>
-                <input type="text" name="Email" class="form-control" />
+                <input type="text" name="Email" class="form-control" required/>
 				<br>
-				<input type="submit" class="btn btn-primary" value="Add" name="email" />
+				<input type="submit" class="btn btn-primary" value="Add" name="email" formnovalidate/>
 				<br><br><input type="checkbox" id="visitor_account" name="checkbox" checked>
 				<label for="visitor_account">Visitor Account</label>
             </div>
             <div class="form-group">
-                <input type="submit" class="btn btn-primary" value="Back" name="login" />
+                <input type="submit" class="btn btn-primary" value="Back" name="login" formnovalidate/>
                 <input type="submit" class="btn btn-primary" value="Update" name="update" />
 			</div>
         </form>
