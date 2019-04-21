@@ -13,13 +13,14 @@
     <div class="wrapper">
         <h2>Transit History</h2>
         <form action="{{ url_for('user_transit_history') }}" method="POST">
-			<form>
 				<fieldset>
 					  <p>
 						 <label>Transport Type</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">All</option>
+							 {% for x in transit_type_list %}
+ 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+ 							{% endfor %}
 						 </select>
 					  </p>
 				</fieldset>
@@ -28,11 +29,12 @@
 						 <label>Contain Site</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">All</option>
+							 {% for x in site_list %}
+ 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+ 							{% endfor %}
 						 </select>
 					  </p>
 				</fieldset>
-			</form>
 			<div class="form-group">
                 <label>Route</label>
                 <input type="text" name="min_price" class="form-control" />

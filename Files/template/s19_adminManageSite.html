@@ -13,20 +13,23 @@
     <div class="wrapper">
         <h2>Manage Site</h2>
         <form action="{{ url_for('admin_manage_site') }}" method="POST">
-			<form>
 				<fieldset>
 					  <p>
 						 <label>Site</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">--ALL--</option>
+							 {% for x in site_list %}
+						  <option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+						  {% endfor %}
 						 </select>
 					  </p>
 					  <p>
 						 <label>Manager</label>
 						 <br>
 						 <select id = "myList">
-							   <option value = "1">--ALL--</option>
+							 {% for x in manager_list %}
+ 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+ 							{% endfor %}
 						 </select>
 					  </p>
 					  <p>
@@ -38,7 +41,6 @@
 						 </select>
 					  </p>
 				</fieldset>
-				</form>
 				<div class="form-group">
 					<input type="submit" class="btn btn-primary" value="Filter" name="Filter" />
 					<br><br>

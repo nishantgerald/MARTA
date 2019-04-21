@@ -33,7 +33,9 @@
 			             <label>Manager</label>
 						 <br>
 			             <select id = "myList" required>
-				               <option value = "1">All</option>
+							 {% for x in unassigned_manager_list %}
+ 							<option value="{{ x }}"{% if loop.first %} SELECTED{% endif %}>{{ x }}</option>
+ 							{% endfor %}
 				         </select>
 			          </p>
        			</fieldset>

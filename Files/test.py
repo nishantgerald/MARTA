@@ -11,6 +11,8 @@ user_type = ""
 employee_type = ""
 username = ""
 employee_info = []
+site_list = []
+transit_type_list = []
  
 def make_db_connection():
     connection = pymysql.connect(host='localhost',
@@ -163,7 +165,7 @@ def register_employee():
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
         firstname = request.form['FirstName']
         lastname = request.form['LastName']
-        phone = request.forn['phone']
+        phone = request.form['phone']
         address = request.form['address']
         city = request.form['city']
         state = request.form['state']
@@ -173,7 +175,7 @@ def register_employee():
         user_query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
         employee_info = [username, 'EID', phone, address, city, state, zipcode, etype]
         with connection.cursor() as cursor:
-            cursor.execute(user_query, values)
+            cursor.execute(user_query, user_values)
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
 
@@ -192,7 +194,7 @@ def register_employee_visitor():
         #NEED TO CONFIRM PASSWORD IS SAME AS CONFIRM FIELD
         firstname = request.form['FirstName']
         lastname = request.form['LastName']
-        phone = request.forn['phone']
+        phone = request.form['phone']
         address = request.form['address']
         city = request.form['city']
         state = request.form['state']
@@ -201,8 +203,9 @@ def register_employee_visitor():
         user_values = [username, password, 'Pending', firstname, lastname, 'Employee, Visitor']
         user_query = "INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (%s,%s,%s,%s,%s,%s)"
         employee_info = [username, 'EID', phone, address, city, state, zipcode, etype]
+
         with connection.cursor() as cursor:
-            cursor.execute(user_query, values)
+            cursor.execute(user_query, user_values)
             connection.commit()
             #NEED TO TAKE IN EMAILS HERE
             
@@ -368,12 +371,16 @@ def prepare_transit_screen():
 @app.route('/user_take_transit', methods=['GET', 'POST'])
 def user_take_transit():
     if "Filter" in request.form:
-        transti_type = request.form["site_name"]
+        site = request.form["site_names"]
+        transit_type = request.form["transport_types"]
+        low_price = request.form["min_price"]
+        high_price = request.form["max_price"]
         filters = [transit_type, site, low_price, high_price]
         connection = make_db_connection()
         with connection.cursor() as cursor:
             cursor.callproc('s15_get_route', filters)
-            available_transit = TakeTransitTable(cursor.fetchall())
+            results = cursor.fetchall()
+            available_transit = TakeTransitTable(results)
             return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = available_transit)
     elif "back" in request.form: 
         render_template('success.html')
@@ -384,6 +391,14 @@ class TakeTransitTable(Table):
     transport_type = Col('Transport Type')
     Price = Col('Price')
     NumConnectedSites = Col('# Connected Sites')
+    allow_sort = True
+
+    def sort_url(self, col_key, reverse=False):
+        if reverse:
+            direction =  'desc'
+        else:
+            direction = 'asc'
+        return url_for('index', sort=col_key, direction=direction)
 
 if __name__ == '__main__':
     app.run(debug=True)
