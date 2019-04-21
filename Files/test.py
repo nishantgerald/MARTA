@@ -352,6 +352,7 @@ def visitor_functionality():
     elif "back" in request.form:
         return render_template('s01_login.html')
 
+
 #End navigation screens-----------------------------------------
 
 def prepare_transit_screen(ttable):
@@ -449,6 +450,13 @@ def user_take_transit():
             return render_template('s14_visitorFunctionality')
         elif user_type == "User":
             return render_template('s07_userFunctionality')
+
+@app.route('/employee_manage_profile', methods=['GET', 'POST'])
+def employee_manage_profile():
+    if "back" in request.form:
+        return render_template('s01_login.html')
+    elif "update" in request.form:
+        return render_template('success.html')
 
 
 if __name__ == '__main__':
