@@ -860,12 +860,23 @@ END //
 DELIMITER;
 
 /* Screen 37 - Visitor Site Detail */
-#LogSiteVisit adds a log entry to visitsite table*/
+/*Display the site details*/
 DELIMITER //
-CREATE PROCEDURE LogSiteVisit(IN VisitDate DATE, Nombre VARCHAR(50), Username VARCHAR(50))
+CREATE PROCEDURE s37_view_site_detail(IN
+sName VARCHAR(50))
+BEGIN
+SELECT SiteName as Site, OpenEveryday, CONCAT(SiteAddress, ', Atlanta, GA ', SiteZipcode) as Address
+FROM site
+WHERE site.SiteName = sname; 
+END //
+DELIMITER ;
+
+/*LogSiteVisit adds a log entry to visitsite table*/
+DELIMITER //
+CREATE PROCEDURE LogSiteVisit(IN VisitDate DATE, Name VARCHAR(50), Username VARCHAR(50))
 BEGIN
 INSERT INTO visitsite (VisitSiteDate, SiteName, VisitorUsername)
-VALUES (VisitDate, Nombre, Username);
+VALUES (VisitDate, Name, Username);
 END //
 DELIMITER ;
 
