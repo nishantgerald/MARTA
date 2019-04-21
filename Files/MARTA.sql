@@ -758,12 +758,7 @@ DELIMITER //
 CREATE PROCEDURE s35_explore_site(IN
   UName VARCHAR(50),
   SName VARCHAR(50),
-  SDate DATE,
-  EDate DATE,
   include_visited ENUM('Yes','No'),
-  open_everyday ENUM('Yes','No',NULL),
-  VrangeL DECIMAL(7,0),
-  VrangeU DECIMAL(7,0),
   ECrangeL DECIMAL(7,0),
   ECrangeU DECIMAL(7,0))
  BEGIN
@@ -788,34 +783,20 @@ CREATE PROCEDURE s35_explore_site(IN
  GROUP BY event.SiteName;
 
 
- SELECT site.SiteName,  (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
- FROM visitsite
- JOIN event on visitsite.EventName = event.EventName AND visitsite.SiteName = event.SiteName AND visitsite.StartDate = event.StartDate
- GROUP BY visitsite.EventName, visitsite.SiteName, visitsite.StartDate
- HAVING count(*) BETWEEN VrangeL AND VrangeU
- AND CASE WHEN include_soldout = 'No'
- THEN TixRemaining > 0
- ELSE TixRemaining = TixRemaining END
- AND CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate) IN (
- SELECT CONCAT(event.EventName,event.SiteName, event.StartDate)
- FROM event
+ SELECT site_visit_counts.SiteName, IFNULL(site_event_counts.event_count,0), (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
+ FROM site_visit_counts
+ JOIN event_visit_counts on site_visit_counts.SiteName = event_visit_counts.SiteName
+ JOIN site_event_counts on site_visit_counts.SiteName = site_event_counts.SiteName
  WHERE
- CASE WHEN EName IS NULL
-  THEN event.EventName = event.EventName
-  ELSE event.EventName = EName END
-  AND CASE WHEN SName IS NULL
-  THEN event.SiteName = event.SiteName
-  ELSE event.SiteName = SName END
-  AND CASE WHEN Keyword IS NULL
-  THEN event.Description LIKE '%'
-  ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
-  AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
+  CASE WHEN SName IS NULL
+  THEN site_visit_counts.SiteName = site_visit_counts.SiteName
+  ELSE site_visit_counts.SiteName = SName END
   AND CASE WHEN include_visited = 'No'
-  THEN CONCAT(event.EventName,event.SiteName, event.StartDate) NOT IN (
-    SELECT CONCAT(visitevent.EventName,visitevent.SiteName, visitevent.StartDate)
-    FROM visitevent WHERE VisitorUsername = UName)
-  ELSE CONCAT(event.EventName,event.SiteName, event.StartDate) = CONCAT(event.EventName,event.SiteName, event.StartDate) END
-  AND EventPrice BETWEEN PrangeL AND PrangeU);
+  THEN CONCAT site_event_counts.SiteName NOT IN (
+    SELECT visitsite.SiteName
+    FROM visitsite WHERE VisitorUsername = UName)
+  ELSE visitsite.SiteName = visitsite.SiteName END
+  AND IFNULL(site_event_counts.event_count,0) BETWEEN ECrangeL AND ECrangeU);
  END //
 DELIMITER ;
 
