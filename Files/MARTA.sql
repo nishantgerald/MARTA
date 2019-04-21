@@ -205,7 +205,6 @@ GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitT
 END //
 DELIMITER ;
 
-
 /* Page 16 - Transit History*/
 DELIMITER //
 CREATE PROCEDURE s16_transit_history(IN
