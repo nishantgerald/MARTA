@@ -10,25 +10,25 @@
     </style>
 </head>
 <body>
-  <script>
-var emailID = 0;
-function emailButton(){
-  emailID++;
-  var html = '<input type="text" name="Email" class="form-control" /> ' +
+ 	<script>
+ 		var emailID = 0;
+ 		function emailButton(){
+ 			emailID++;
+ 			var html = '<input type="text" name="Email" class="form-control" /> ' +
              '<a href="" onclick="javascript:removeElement(emailID); return false;">Remove</a>';
-  addElement('emails', 'p', emailID, html);
-}
-function addElement(parentId, elementTag, elementId, html) {
-  // Adds an element to the document
-  var p = document.getElementById(parentId);
-  var newElement = document.createElement(elementTag);
-  newElement.setAttribute('id', elementId);
-  newElement.innerHTML = html;
-  p.appendChild(newElement);
-}
-function removeElement(elementId) {
-  // Removes an element from the document
-  var element = document.getElementById(elementId);
+             addElement('emails', 'p', emailID, html);
+         }
+         function addElement(parentId, elementTag, elementId, html) {
+         // Adds an element to the document
+         var p = document.getElementById(parentId);
+         var newElement = document.createElement(elementTag);
+         newElement.setAttribute('id', elementId);
+         newElement.innerHTML = html;
+         p.appendChild(newElement);
+     }
+     function removeElement(elementId) {
+     // Removes an element from the document
+     var element = document.getElementById(elementId);
   element.parentNode.removeChild(element);
 }
 function addEmail() {
@@ -151,7 +151,7 @@ function addEmail() {
                 <input type="submit" onclick="emailButton()" class="btn btn-primary" value="Add" name="Add" formnovalidate/>
             </div>
             <div class="form-group">
-                <input type="submit" class="btn btn-primary" value="Back" name="Back" formnovalidate/>
+                <input type="submit" class="btn btn-primary" value="Back" name="back" formnovalidate />
                 <input type="submit" class="btn btn-primary" value="Register" name="Register" />
             </div>
         </form>

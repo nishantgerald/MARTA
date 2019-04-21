@@ -155,7 +155,7 @@ def register_visitor():
 
 #EVERYTHING UNTIL THIS POINT WORKS----------------------------------------------------
 
-@app.route('/register_employee', methods=['GET', 'POST'])
+@app.route('/employee', methods=['GET', 'POST'])
 def register_employee():
     if "Register" in request.form:
         connection = make_db_connection()
@@ -181,7 +181,7 @@ def register_employee():
             close_db_connection(connection)
             return "Thank you for registering! You will be able to login once your account is approved."
 
-    elif "Back" in request.form:
+    elif "back" in request.form:
         return render_template('s02_registerNavigation.html')
 
 @app.route('/register_employee_visitor', methods=['GET', 'POST'])
@@ -363,12 +363,15 @@ def prepare_transit_screen():
         transit_type_query = "SELECT DISTINCT TransitType FROM Beltline.transit;"
         transit_cursor.execute(site_query)
         transit_type_list = [row for row in cursor.fetchall()]
+    close_db_connection(connection)
     return render_template('s15_userTakeTransit.html', site_list, transit_type_list)
 
 @app.route('/user_take_transit', methods=['GET', 'POST'])
 def user_take_transit():
     if "Filter" in request.form:
         return
+    elif "back" in request.form:
+        render.template('success.html')
 
 
 
