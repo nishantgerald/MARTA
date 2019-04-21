@@ -373,6 +373,8 @@ def user_take_transit():
         connection = make_db_connection()
         with connection.cursor() as cursor:
             cursor.callproc('s15_get_route', filters)
+            available_transit = TakeTransitTable(cursor.fetchall())
+            return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = available_transit)
     elif "back" in request.form: 
         render_template('success.html')
 
@@ -385,10 +387,6 @@ class TakeTransitTable(Table):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-
-
-
 
 
 
