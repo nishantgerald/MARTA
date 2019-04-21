@@ -144,6 +144,17 @@ DELIMITER ;
 
 
 /* Screen 17 - Employee Manage Profile */
+DELIMITER //
+CREATE PROCEDURE s17_manage_profile(IN username VARCHAR(50),fname VARCHAR(50), lname VARCHAR(50), phone VARCHAR(20))
+BEGIN
+UPDATE user
+SET user.Firstname=fname,user.Lastname=lname
+WHERE user.Username=username;
+UPDATE employee
+SET employee.Phone=phone
+WHERE employee.Username=username;
+END //
+DELIMITER ;
 
 /* Screen 18 - Administrator Manage User */
 
