@@ -1,7 +1,7 @@
 import pymysql.cursors
 from flask import Flask, session, redirect, url_for, escape, request, render_template, jsonify
 import json
-from flask_table import Table, Col
+from flask_table import Table, Col, ButtonCol, LinkCol
 
 app = Flask(__name__, template_folder='template')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -58,7 +58,6 @@ def login():
                             return "Sorry, your account is not approved for login"
                 else:
                     return "ERROR: Invalid Username"
-
                 if user_type == "Employee":
                     with connection.cursor() as cursor3:
                         cursor3.callproc('s01_employee_check_type', [user_email])
@@ -369,11 +368,12 @@ def prepare_transit_screen(ttable):
     return render_template('s15_userTakeTransit.html', site_list = site_list, transit_type_list = transit_type_list, take_transit_table = ttable)
 
 class TakeTransitTable(Table):
-    #id = Col('Id', show=False)
+    id = Col('Id', show=False)
     route = Col('Route')
     ttype = Col('Transport Type')
     price = Col('Price')
     conn_sites = Col('# Connected Sites')
+    log_transit = LinkCol('Log Transit', 'log_transit', url_kwargs=dict(route="route"))
     allow_sort = True
 
     def sort_url(self, col_key, reverse=False):
@@ -384,11 +384,21 @@ class TakeTransitTable(Table):
         return url_for('index', sort=col_key, direction=direction)
 
 class Item(object):
-    def __init__(self, route, ttype, price, conn_sites):
+    def __init__(self, ids, route, ttype, price, conn_sites):
+        self.ids = ids
         self.route = route
         self.ttype = ttype
         self.price = price
         self.conn_sites = conn_sites
+
+@app.route('/user_take_transit/<string:route>', methods=['GET', 'POST'])
+def edit(route):
+    connection = make_db_connection()
+    with connection.cursor() as cursoor:
+        qry = connection.callproc('LogTransit')
+    close_db_connection(connection)
+    return
+
 
 @app.route('/user_take_transit', methods=['GET', 'POST'])
 def user_take_transit():
@@ -411,17 +421,34 @@ def user_take_transit():
             cursor.callproc('s15_get_route', filters)
             results = cursor.fetchall()
             items = []
-            for row in results:
+            for i, row in enumerate(results):
+                row_ids = i
                 row_route = row['Route']
                 row_type = row['Type']
                 row_price = row['Price']
                 row_numSites = row['No_of_Connected_Sites']
-                items.append(Item(row_route, row_type, row_price, row_numSites))
+                items.append(Item(row_ids, row_route, row_type, row_price, row_numSites))
             available_transit = TakeTransitTable(items)
             return prepare_transit_screen(available_transit)
     elif "back" in request.form: 
-        render_template('success.html')
-
+        if user_type == "Employee":
+            if employee_type == "Admin":
+                return render_template('s08_adminFunctionality.html')
+            elif employee_type == "Manager":
+                return render_template('s10_managerFunctionality.html')
+            elif employee_type == "Staff":
+                return render_template('s12_staffFunctionality.html')
+        elif user_type == "Employee, Visitor":
+            if employee_type == "Admin":
+                return render_template('s09_adminVisitorFunctionality.html')
+            elif employee_type == "Manager":
+                return render_template('s11_managerVisitorFunctionality.html')
+            elif employee_type == "Staff":
+                return render_template('s13_staffVisitorFunctionality.html')
+        elif user_type == "Visitor":
+            return render_template('s14_visitorFunctionality')
+        elif user_type == "User":
+            return render_template('s07_userFunctionality')
 
 
 if __name__ == '__main__':
