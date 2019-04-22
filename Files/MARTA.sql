@@ -273,6 +273,22 @@ WHERE
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s19_manager_list()
+BEGIN
+SELECT CONCAT(FirstName, ' ', LastName)
+FROM user
+WHERE UserName in (SELECT UserName FROM employee WHERE EmployeeType = 'Manager');
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s19_delete_site(IN name VARCHAR(50))
+BEGIN
+DELETE FROM site
+WHERE SiteName = name;
+END //
+DELIMITER;
 /* Screen 20 - Administrator Edit Site */
 
 DELIMITER //
@@ -308,6 +324,16 @@ BEGIN
 SET @Mgrname=(SELECT UserName FROM user WHERE user.Firstname=Fname AND user.Lastname=Lname);
 INSERT INTO site(Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUsername) VALUES (SName, SAddress, SZipcode, open_everyday, @Mgrname);
 
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s21_manager_not_assigned()
+BEGIN
+SELECT CONCAT(FirstName, ' ', LastName)
+FROM user
+WHERE Username in (SELECT Username FROM employee WHERE EmployeeType = 'Manager') 
+AND Username not in (SELECT DISTINCT ManagerUsername FROM site);
 END //
 DELIMITER;
 
@@ -412,6 +438,15 @@ WHERE transit.TransitRoute = OldRoute AND transit.TransitType = TType;
 END //
 DELIMITER;
 
+DELIMITER //
+CREATE PROCEDURE s23_site_list(IN Route VARCHAR(20))
+BEGIN
+SELECT SiteName
+FROM connect
+WHERE TransitRoute = Route;
+END //
+DELIMITER;
+
 /* Screen 24 - Administrator Create Transit */
 #get connected sites
 
@@ -427,6 +462,7 @@ INSERT INTO transit(TransitType, TransitRoute, TransitPrice)
 VALUES (TType, Route, Price);
 END //
 DELIMITER;
+
 
 /* Screen 25 - Manager Manage Event */
 /*#MANAGE EVENT - Page 25
@@ -581,7 +617,6 @@ WHERE EventName = EName and StartDate = SDate and SiteName = SName;
 END //
 DELIMITER;
 
-#display table for each day in event
 
 /* Screen 27 - Manager Create Event */
 
