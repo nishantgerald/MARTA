@@ -47,12 +47,21 @@ DELIMITER ;
 
 /* Screen 04- Register Visitor Only */
 DELIMITER //
-CREATE PROCEDURE s03_add_email(IN UName VARCHAR(50),
+CREATE PROCEDURE s04_add_email(IN UName VARCHAR(50),
   EMail VARCHAR(50))
  BEGIN
  INSERT INTO emails(Username,Email) VALUES (UName,EMail);
  END //
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE s04_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+BEGIN
+INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
+VALUES(UName, Pass, 'Pending', 'Visitor', FName, LName);
+END //
+DELIMITER;
+
 
 /* Screen 05 - Register Employee Only */
 
