@@ -254,6 +254,16 @@ END //
 DELIMITER ;
 
 DELIMITER //
+CREATE PROCEDURE s17_show_emp_emails(IN 
+EmpUsername VARCHAR(50))
+BEGIN
+  SELECT emails.Email
+  FROM emails
+  WHERE emails.Username = EmpUsername;
+END //
+DELIMITER ;
+
+DELIMITER //
 CREATE PROCEDURE s17_manage_profile(IN
   username VARCHAR(50),
   fname VARCHAR(50),
