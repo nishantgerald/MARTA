@@ -1,0 +1,6 @@
+DELIMITER //
+CREATE PROCEDURE s03_remove_email(IN UName VARCHAR(50), EMail VARCHAR(50))
+BEGIN
+DELETE FROM emails
+WHERE Username = UName AND Email = EMail;
+END //
