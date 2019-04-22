@@ -48,11 +48,12 @@ CREATE PROCEDURE s03_register_user(IN
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE s03_remove_email(IN UName VARCHAR(50), EMail VARCHAR(50))
-BEGIN
-DELETE FROM emails
-WHERE Username = UName AND Email = EMail;
-END //
+CREATE PROCEDURE s03_add_email(IN UName VARCHAR(50),
+  EMail VARCHAR(50))
+ BEGIN
+ INSERT INTO emails(Username,Email) VALUES (UName,EMail);
+ END //
+DELIMITER ;
 
 /* Screen 04- Register Visitor Only */
 DELIMITER //
@@ -73,6 +74,22 @@ DELIMITER;
 
 
 /* Screen 05 - Register Employee Only */
+DELIMITER //
+CREATE PROCEDURE s05_add_email(IN UName VARCHAR(50),
+  EMail VARCHAR(50))
+ BEGIN
+ INSERT INTO emails(Username,Email) VALUES (UName,EMail);
+ END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE s05_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+BEGIN
+INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
+VALUES(UName, Pass, 'Pending', 'Employee', FName, LName);
+END //
+DELIMITER;
+
 
 DELIMITER //
 CREATE PROCEDURE s05_register_employee(IN
@@ -95,6 +112,22 @@ CREATE PROCEDURE s05_register_employee(IN
 DELIMITER ;
 
 /* Screen 06 - Register Employee-Visitor*/
+DELIMITER //
+CREATE PROCEDURE s06_add_email(IN UName VARCHAR(50),
+  EMail VARCHAR(50))
+ BEGIN
+ INSERT INTO emails(Username,Email) VALUES (UName,EMail);
+ END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE s06_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+BEGIN
+INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
+VALUES(UName, Pass, 'Pending', 'Employee, Visitor', FName, LName);
+END //
+DELIMITER;
+
 DELIMITER //
 CREATE PROCEDURE s06_register_employee_visitor(IN
   UName VARCHAR(50),
@@ -160,6 +193,13 @@ END //
 DELIMITER;
 
 /* Screen 16 - User Transit History */
+DELIMITER //
+CREATE PROCEDURE s16_get_sites()
+BEGIN
+SELECT DISTINCT SiteName
+FROM site;
+END //
+DELIMITER;
 
 DELIMITER //
 CREATE PROCEDURE s16_transit_history(IN
@@ -196,6 +236,8 @@ DELIMITER ;
 
 
 /* Screen 17 - Employee Manage Profile */
+
+
 DELIMITER //
 CREATE PROCEDURE s17_manage_profile(IN username VARCHAR(50),fname VARCHAR(50), lname VARCHAR(50), phone VARCHAR(20))
 BEGIN
