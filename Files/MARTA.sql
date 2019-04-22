@@ -48,11 +48,12 @@ CREATE PROCEDURE s03_register_user(IN
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE s03_remove_email(IN UName VARCHAR(50), EMail VARCHAR(50))
-BEGIN
-DELETE FROM emails
-WHERE Username = UName AND Email = EMail;
-END //
+CREATE PROCEDURE s03_add_email(IN UName VARCHAR(50),
+  EMail VARCHAR(50))
+ BEGIN
+ INSERT INTO emails(Username,Email) VALUES (UName,EMail);
+ END //
+DELIMITER ;
 
 /* Screen 04- Register Visitor Only */
 DELIMITER //
@@ -74,6 +75,22 @@ DELIMITER;
 
 
 /* Screen 05 - Register Employee Only */
+DELIMITER //
+CREATE PROCEDURE s05_add_email(IN UName VARCHAR(50),
+  EMail VARCHAR(50))
+ BEGIN
+ INSERT INTO emails(Username,Email) VALUES (UName,EMail);
+ END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE s05_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+BEGIN
+INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
+VALUES(UName, Pass, 'Pending', 'Employee', FName, LName);
+END //
+DELIMITER;
+
 
 DELIMITER //
 CREATE PROCEDURE s05_register_employee(IN
@@ -98,6 +115,22 @@ DELIMITER ;
 
 /* Screen 06 - Register Employee-Visitor*/
 DELIMITER //
+CREATE PROCEDURE s06_add_email(IN UName VARCHAR(50),
+  EMail VARCHAR(50))
+ BEGIN
+ INSERT INTO emails(Username,Email) VALUES (UName,EMail);
+ END //
+DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE s06_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+BEGIN
+INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
+VALUES(UName, Pass, 'Pending', 'Employee, Visitor', FName, LName);
+END //
+DELIMITER;
+
+DELIMITER //
 CREATE PROCEDURE s06_register_employee_visitor(IN
   UName VARCHAR(50),
   Pass VARCHAR(200),
@@ -117,7 +150,8 @@ CREATE PROCEDURE s06_register_employee_visitor(IN
  INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
  END //
 DELIMITER ;
-/* Screens 7-4 - Functionality/Navigation Screens */
+
+/* Screens 7-14 - Functionality/Navigation Screens */
 
 /* Screen 15 - User Take Transit */
 
@@ -163,6 +197,13 @@ END //
 DELIMITER;
 
 /* Screen 16 - User Transit History */
+DELIMITER //
+CREATE PROCEDURE s16_get_sites()
+BEGIN
+SELECT DISTINCT SiteName
+FROM site;
+END //
+DELIMITER;
 
 DELIMITER //
 CREATE PROCEDURE s16_transit_history(IN
@@ -199,6 +240,19 @@ DELIMITER ;
 
 
 /* Screen 17 - Employee Manage Profile */
+#Get employee profile
+DELIMITER //
+CREATE PROCEDURE s17_show_emp_profile(IN 
+EmpUsername VARCHAR(50))
+BEGIN
+  SELECT user.FirstName as FirstName, user.LastName as LastName, employee.Username as username, site.SiteName as SiteName, employee.employeeID as EmployeeID, employee.Phone as Phone, CONCAT(employee.EmployeeAddress, ', ', employee.EmployeeCity, ', ', employee.EmployeeState, ' ', employee.EmployeeZipcode) as EmpAddress
+  FROM employee
+  JOIN user ON employee.Username = user.Username
+  LEFT JOIN site ON site.ManagerUsername = employee.Username
+  WHERE employee.Username = EmpUsername;
+END //
+DELIMITER ;
+
 DELIMITER //
 CREATE PROCEDURE s17_manage_profile(IN
   username VARCHAR(50),
@@ -251,6 +305,7 @@ BEGIN
   SET @EID = (SELECT MAX(EmployeeID) FROM Beltline.employee) + 1;
   UPDATE user
   SET Status = UStat
+  
   WHERE Username = UName;
   UPDATE employee
   SET EmployeeID = @EID
@@ -301,8 +356,20 @@ BEGIN
 DELETE FROM site
 WHERE SiteName = name;
 END //
-DELIMITER;
+DELIMITER ;
+
 /* Screen 20 - Administrator Edit Site */
+DELIMITER //
+CREATE PROCEDURE s20_get_managers(IN 
+siteName VARCHAR(50))
+
+BEGIN
+SELECT CONCAT(user.FirstName, ' ', user.LastName)
+FROM user
+WHERE user.Username NOT IN ( SELECT site.ManagerUsername FROM site) 
+AND user.Username = (SELECT site.ManagerUserName FROM site WHERE site.SiteName = siteName) ;
+END //
+DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s20_edit_site(IN
@@ -461,6 +528,16 @@ END //
 DELIMITER;
 
 /* Screen 24 - Administrator Create Transit */
+#get connected sites
+DELIMITER //
+CREATE PROCEDURE s24_get_conn_sites(IN
+TType ENUM('MARTA', 'Bus', 'Bike'),
+TRRoute VARCHAR(20))
+BEGIN
+SELECT DISTINCT SiteName from connect
+WHERE connect.TransitType = TType AND connect.TransitRoute = TRoute;
+END //
+DELIMITER ;
 
 /* Page 24 Create Transit */
 DELIMITER //
