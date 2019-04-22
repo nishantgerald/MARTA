@@ -12,11 +12,12 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s01_user_login_check_password(IN
   EMailID VARCHAR(50),
-  Pass VARCHAR(25))
+  Pass VARCHAR(200))
 BEGIN
+	set @hashp = MD5(Pass);
 	SELECT UserType, Status
     FROM user
-    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = @hashp;
  END //
 DELIMITER ;
 
@@ -36,12 +37,13 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s03_register_user(IN
   UName VARCHAR(50),
-  Pass VARCHAR(25),
+  Pass VARCHAR(200),
   UType ENUM('Visitor','User'),
   FName VARCHAR(50),
   LName VARCHAR(50))
  BEGIN
- INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ set @hashp = MD5(Pass);
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,@hashp,'Pending',FName,LName,UType);
  END //
 DELIMITER ;
 
@@ -332,7 +334,7 @@ CREATE PROCEDURE s21_manager_not_assigned()
 BEGIN
 SELECT CONCAT(FirstName, ' ', LastName)
 FROM user
-WHERE Username in (SELECT Username FROM employee WHERE EmployeeType = 'Manager') 
+WHERE Username in (SELECT Username FROM employee WHERE EmployeeType = 'Manager')
 AND Username not in (SELECT DISTINCT ManagerUsername FROM site);
 END //
 DELIMITER;
@@ -548,7 +550,7 @@ DELIMITER;
 
 #Get top event details
 DELIMITER //
-CREATE PROCEDURE s26_get_details(IN 
+CREATE PROCEDURE s26_get_details(IN
 EName VARCHAR(50),
 SDate DATE,
 SName VARCHAR(50))
@@ -561,7 +563,7 @@ DELIMITER ;
 
 #Get assigned staff
 DELIMITER //
-CREATE PROCEDURE s26_get_staff(IN 
+CREATE PROCEDURE s26_get_staff(IN
 EName VARCHAR(50),
 SDate DATE,
 SName VARCHAR(50))
@@ -619,7 +621,7 @@ DELIMITER;
 
 #Get assigned staff
 DELIMITER //
-CREATE PROCEDURE s26_get_event_days(IN 
+CREATE PROCEDURE s26_get_event_days(IN
 EName VARCHAR(50),
 SDate DATE,
 SName VARCHAR(50))
@@ -831,14 +833,14 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s32_event_detail(IN EName VARCHAR(50), SName VARCHAR(100), SDate DATE)
  BEGIN
- 
+
  DROP VIEW IF EXISTS assigned_staff;
- 
+
 CREATE VIEW assigned_staff AS
  SELECT concat(user.Firstname," ",user. Lastname) as FullName, staff_Assignment.EventName as EventName, staff_Assignment.StartDate as StartDate, staff_Assignment.SiteName as SiteName
  FROM user
  JOIN staff_assignment ON user.Username = staff_assignment.StaffUsername;
- 
+
 SELECT event.EventName, event.SiteName, event.StartDate, event.EndDate, DATEDIFF(event.EndDate,event.StartDate) as Duration_days, assigned_staff.FullName, event.Capacity, event.EventPrice, event.Description
 FROM event
 JOIN assigned_staff ON event.EventName = assigned_staff.EventName AND event.startDate = assigned_staff.StartDate AND event.SiteName = assigned_staff.SiteName
