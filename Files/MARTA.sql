@@ -142,6 +142,14 @@ FROM site;
 END //
 DELIMITER;
 
+DELIMITER //
+CREATE PROCEDURE s15_log_transit(IN Date DATE, Type ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), Name VARCHAR(50))
+BEGIN
+INSERT INTO take(TransitDate, TransitType, TransitRoute, Username)
+VALUES(Date, Type, Route, Name);
+END //
+DELIMITER;
+
 /* Screen 16 - User Transit History */
 
 DELIMITER //
