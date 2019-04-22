@@ -711,28 +711,33 @@ DELIMITER ;
 
 /* Screen 32 - Staff Event Detail */
 DELIMITER //
-CREATE PROCEDURE s32_event_detail(IN EName VARCHAR(50))
+CREATE PROCEDURE s32_event_detail(IN EName VARCHAR(50), SName VARCHAR(100), SDate DATE)
  BEGIN
- SELECT EventName, SiteName, StartDate, EndDate, DATEDIFF(EndDate,StartDate) as Duration_days, Capacity, EventPrice
-FROM event
-WHERE EventName = EName;
- END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE s32_staff_assignment(IN EName VARCHAR(50))
- BEGIN
- SELECT concat(Firstname," ",Lastname)
+ 
+ DROP VIEW IF EXISTS assigned_staff;
+ 
+CREATE VIEW assigned_staff AS
+ SELECT concat(user.Firstname," ",user. Lastname) as FullName, staff_Assignment.EventName as EventName, staff_Assignment.StartDate as StartDate, staff_Assignment.SiteName as SiteName
  FROM user
- WHERE Username in (
-	SELECT StaffUsername
-	FROM staff_assignment
-	WHERE EventName = EName)
-;
+ JOIN staff_assignment ON user.Username = staff_assignment.StaffUsername;
+ 
+SELECT event.EventName, event.SiteName, event.StartDate, event.EndDate, DATEDIFF(event.EndDate,event.StartDate) as Duration_days, assigned_staff.FullName, event.Capacity, event.EventPrice, event.Description
+FROM event
+JOIN assigned_staff ON event.EventName = assigned_staff.EventName AND event.startDate = assigned_staff.StartDate AND event.SiteName = assigned_staff.SiteName
+WHERE event.EventName = EName AND event.SiteName = SName AND event.StartDate = SDate;
  END //
 DELIMITER ;
 
 /* Screen 33 - Staff Event Detail */
+/* Site name dropdown */
+DELIMITER //
+CREATE PROCEDURE s33_get_sites()
+BEGIN
+SELECT DISTINCT SiteName from site;
+END //
+DELIMITER ;
+
+/* get table */
 DELIMITER //
 CREATE PROCEDURE s33_explore_event(IN
   UName VARCHAR(50),
@@ -778,7 +783,7 @@ CREATE PROCEDURE s33_explore_event(IN
   ELSE event.SiteName = SName END
   AND CASE WHEN Keyword IS NULL
   THEN event.Description LIKE '%'
-  ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
+  ELSE event.Description LIKE CONCAT('%',Keyword,'%') END
   AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
   AND CASE WHEN include_visited = 'No'
   THEN CONCAT(event.EventName,event.SiteName, event.StartDate) NOT IN (
@@ -794,7 +799,6 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s34_event_detail(IN eName VARCHAR(100), sName VARCHAR(50), startDate DATE, tixRemaining INT)
 BEGIN
-
 SELECT EventName as Event, SiteName as Site, StartDate, EndDate, EventPrice as TicketPrice, tixRemaining as TicketsRemaining, Description
 FROM Event
 WHERE event.EventName = eName AND event.SiteName = sName AND event.StartDate = startDate;
@@ -815,6 +819,15 @@ CREATE PROCEDURE s34_log_event_visit(IN
 DELIMITER ;
 
 /* Screen 35 - Visitor Explore Site */
+/* Site Name dropdown */
+DELIMITER //
+CREATE PROCEDURE s35_get_sites()
+BEGIN
+SELECT DISTINCT SiteName from site;
+END //
+DELIMITER ;
+
+/* Display table */
 DELIMITER //
 CREATE PROCEDURE s35_explore_site(IN
   UName VARCHAR(50),
