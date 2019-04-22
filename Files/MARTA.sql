@@ -150,7 +150,8 @@ CREATE PROCEDURE s06_register_employee_visitor(IN
  INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
  END //
 DELIMITER ;
-/* Screens 7-4 - Functionality/Navigation Screens */
+
+/* Screens 7-14 - Functionality/Navigation Screens */
 
 /* Screen 15 - User Take Transit */
 
@@ -239,7 +240,18 @@ DELIMITER ;
 
 
 /* Screen 17 - Employee Manage Profile */
-
+#Get employee profile
+DELIMITER //
+CREATE PROCEDURE s17_show_emp_profile(IN 
+EmpUsername VARCHAR(50))
+BEGIN
+  SELECT user.FirstName as FirstName, user.LastName as LastName, employee.Username as username, site.SiteName as SiteName, employee.employeeID as EmployeeID, employee.Phone as Phone, CONCAT(employee.EmployeeAddress, ', ', employee.EmployeeCity, ', ', employee.EmployeeState, ' ', employee.EmployeeZipcode) as EmpAddress
+  FROM employee
+  JOIN user ON employee.Username = user.Username
+  LEFT JOIN site ON site.ManagerUsername = employee.Username
+  WHERE employee.Username = EmpUsername;
+END //
+DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s17_manage_profile(IN username VARCHAR(50),fname VARCHAR(50), lname VARCHAR(50), phone VARCHAR(20))
@@ -288,6 +300,7 @@ CREATE PROCEDURE s18_user_status_update(IN
 BEGIN
 	UPDATE user
   SET Status = UStat
+  
   WHERE Username = UName;
  END //
 DELIMITER ;
