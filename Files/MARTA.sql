@@ -83,7 +83,7 @@ CREATE PROCEDURE s05_register_employee(IN
   FName VARCHAR(50),
   LName VARCHAR(50),
   EID CHAR(9),
-  Phone VARCHAR(20),
+  Phone DECIMAL(10,0),
   EAddress VARCHAR(100),
   ECity VARCHAR(50),
   EState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other'),
@@ -105,7 +105,7 @@ CREATE PROCEDURE s06_register_employee_visitor(IN
   FName VARCHAR(50),
   LName VARCHAR(50),
   EID CHAR(9),
-  Phone VARCHAR(20),
+  Phone DECIMAL(10,0),
   EAddress VARCHAR(100),
   ECity VARCHAR(50),
   EState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other'),
@@ -200,7 +200,11 @@ DELIMITER ;
 
 /* Screen 17 - Employee Manage Profile */
 DELIMITER //
-CREATE PROCEDURE s17_manage_profile(IN username VARCHAR(50),fname VARCHAR(50), lname VARCHAR(50), phone VARCHAR(20))
+CREATE PROCEDURE s17_manage_profile(IN
+  username VARCHAR(50),
+  fname VARCHAR(50),
+  lname VARCHAR(50),
+  phone DECIMAL(10,0))
 BEGIN
 UPDATE user
 SET user.Firstname=fname,user.Lastname=lname
@@ -244,8 +248,10 @@ CREATE PROCEDURE s18_user_status_update(IN
   UName VARCHAR(50),
   UStat ENUM('Approved','Declined'))
 BEGIN
+  SET @EID = (SELECT MAX(EmployeeID) FROM Beltline.employee) + 1;
 	UPDATE user
   SET Status = UStat
+  SET EmployeeID = @EID
   WHERE Username = UName;
  END //
 DELIMITER ;
@@ -394,9 +400,9 @@ DELIMITER;
 
 /* Screen 23 - Administrator Edit Transit */
 /*Edit transit- Page 23
-#RemoveSites removes all entries matching the entered route num
+/*RemoveSites removes all entries matching the entered route num
 #EditTransit re adds rows corresponding to the newly entered sites
-#EditPrice updates price if it is changed in transit table*/
+/#EditPrice updates price if it is changed in transit table*/
 
 DELIMITER //
 CREATE PROCEDURE s23_delete_sites(IN
@@ -453,8 +459,6 @@ END //
 DELIMITER;
 
 /* Screen 24 - Administrator Create Transit */
-#get connected sites
-
 
 /* Page 24 Create Transit */
 DELIMITER //
@@ -578,7 +582,7 @@ BEGIN
 END //
 DELIMITER ;
 
-#remove unhighlighted staff
+/*remove unhighlighted staff*/
 DELIMITER //
 CREATE PROCEDURE s26_remove_staff(IN
   EName VARCHAR(50),
@@ -593,7 +597,7 @@ WHERE EventName = EName AND StartDate = SDate AND SiteName = SName AND StaffUser
 END //
 DELIMITER;
 
-#add highlighted staff
+/*add highlighted staff*/
 DELIMITER //
 CREATE PROCEDURE s26_add_staff(IN
   EName VARCHAR(50),
@@ -608,7 +612,7 @@ VALUES (@Staffname, EName, SName, SDate);
 END //
 DELIMITER;
 
-#Update description
+/*Update description*/
 DELIMITER //
 CREATE PROCEDURE s26_update_description(IN
   EName VARCHAR(50),
@@ -622,7 +626,7 @@ WHERE EventName = EName and StartDate = SDate and SiteName = SName;
 END //
 DELIMITER;
 
-#Get assigned staff
+/*Get assigned staff*/
 DELIMITER //
 CREATE PROCEDURE s26_get_event_days(IN
 EName VARCHAR(50),
@@ -913,7 +917,7 @@ CREATE PROCEDURE s33_explore_event(IN
 DELIMITER ;
 
 /* Screen 34 - Visitor Event Detail */
-#Get event detail
+/*Get event detail*/
 DELIMITER //
 CREATE PROCEDURE s34_event_detail(IN eName VARCHAR(100), sName VARCHAR(50), startDate DATE, tixRemaining INT)
 BEGIN
@@ -923,7 +927,7 @@ WHERE event.EventName = eName AND event.SiteName = sName AND event.StartDate = s
 END //
 DELIMITER ;
 
-#Log Visit Event
+/*Log Visit Event*/
 DELIMITER //
 CREATE PROCEDURE s34_log_event_visit(IN
   UName VARCHAR(50),
@@ -1030,7 +1034,7 @@ CREATE PROCEDURE s35_explore_site(IN
   DELIMITER ;
 
 /* Screen 36 - Visitor Transit Detail */
-#First get the table info
+/*First get the table info*/
 DELIMITER //
 CREATE PROCEDURE s36_transit_detail(IN TType ENUM('MARTA','Bus','Bike'), sName VARCHAR(50))
 BEGIN
@@ -1048,7 +1052,7 @@ WHERE transit.TransitType = TType AND connect.siteName = sName;
 END //
 DELIMITER ;
 
-#Log transit
+/*Log transit*/
 DELIMITER //
 CREATE PROCEDURE s36_log_transit(In TDate DATE, TType ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), UserN VARCHAR(50))
 BEGIN
@@ -1079,7 +1083,7 @@ END //
 DELIMITER;
 
 /* Screen 38 - Visitor Site Detail */
-#First query for site list
+/*First query for site list*/
 DELIMITER //
 CREATE PROCEDURE s38_get_sites()
 BEGIN
@@ -1087,7 +1091,7 @@ SELECT DISTINCT SiteName from site;
 END //
 DELIMITER ;
 
-#Display Table
+/*Display Table*/
 DELIMITER //
 CREATE PROCEDURE s38_display_visit_history(IN
 eName VARCHAR(100),
