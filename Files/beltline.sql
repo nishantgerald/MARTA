@@ -21,7 +21,7 @@ CREATE TABLE emails
 CREATE TABLE employee
 (
   EmployeeID CHAR(9) NOT NULL,
-  Phone DECIMAL(9,0) NOT NULL,
+  Phone DECIMAL(10,0) NOT NULL,
   EmployeeAddress VARCHAR(100) NOT NULL,
   EmployeeCity VARCHAR(50) NOT NULL,
   EmployeeState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other') NOT NULL,
