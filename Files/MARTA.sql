@@ -45,6 +45,13 @@ CREATE PROCEDURE s03_register_user(IN
  END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s03_remove_email(IN UName VARCHAR(50), EMail VARCHAR(50))
+BEGIN
+DELETE FROM emails
+WHERE Username = UName AND Email = EMail;
+END //
+
 /* Screen 04- Register Visitor Only */
 DELIMITER //
 CREATE PROCEDURE s04_add_email(IN UName VARCHAR(50),
@@ -134,6 +141,22 @@ GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitT
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s15_get_sites()
+BEGIN
+SELECT DISTINCT SiteName
+FROM site;
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s15_log_transit(IN Date DATE, Type ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), Name VARCHAR(50))
+BEGIN
+INSERT INTO take(TransitDate, TransitType, TransitRoute, Username)
+VALUES(Date, Type, Route, Name);
+END //
+DELIMITER;
+
 /* Screen 16 - User Transit History */
 
 DELIMITER //
@@ -181,7 +204,8 @@ UPDATE employee
 SET employee.Phone=phone
 WHERE employee.Username=username;
 END //
-DELIMITER ;
+DELIMITER;
+
 
 /* Screen 18 - Administrator Manage User */
 
@@ -372,7 +396,7 @@ CREATE PROCEDURE s23_edit_price(IN
 BEGIN
 UPDATE transit
 SET transit.TransitPrice = Price
-WHERE connect.TransitRoute = Route AND connect.TransitType = TType;
+WHERE transit.TransitRoute = Route AND transit.TransitType = TType;
 END //
 DELIMITER;
 
@@ -384,7 +408,7 @@ CREATE PROCEDURE s23_edit_route(IN
 BEGIN
 UPDATE transit
 SET transit.TransitRoute = Route
-WHERE connect.TransitRoute = OldRoute AND connect.TransitType = TType;
+WHERE transit.TransitRoute = OldRoute AND transit.TransitType = TType;
 END //
 DELIMITER;
 
