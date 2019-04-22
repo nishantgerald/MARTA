@@ -249,9 +249,11 @@ CREATE PROCEDURE s18_user_status_update(IN
   UStat ENUM('Approved','Declined'))
 BEGIN
   SET @EID = (SELECT MAX(EmployeeID) FROM Beltline.employee) + 1;
-	UPDATE user
+  UPDATE user
   SET Status = UStat
-  SET EmployeeID = @EID
+  WHERE Username = UName;
+  UPDATE employee 
+  SET EmployeeID = @EID 
   WHERE Username = UName;
  END //
 DELIMITER ;
