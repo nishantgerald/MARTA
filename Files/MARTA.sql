@@ -102,7 +102,7 @@ DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s15_get_route(IN
-  TType VARCHAR(50),
+  TType ENUM('MARTA','Bus','Bike'),
   Site VARCHAR(50),
   PrangeL DECIMAL(7,2),
   PrangeU DECIMAL(7,2))
