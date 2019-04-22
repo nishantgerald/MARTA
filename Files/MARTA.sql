@@ -581,7 +581,6 @@ END //
 DELIMITER ;
 
 /* Screen 29 - Manager Site Report */
-
 DELIMITER //
 CREATE PROCEDURE s29_manager_site_report(IN
   SName VARCHAR(50),
@@ -605,27 +604,17 @@ SELECT SiteName, StartDate, EndDate, count(*) as num_events
 FROM event
 GROUP BY SiteName, StartDate, EndDate, SiteName;
 
-DROP VIEW IF EXISTS site_visit_counts;
+DROP VIEW IF EXISTS total_visit_counts;
 
-CREATE VIEW site_visit_counts AS
-SELECT  SiteName, VisitSiteDate as VisitDate , count(*) as site_visits
+CREATE VIEW total_visit_counts AS
+SELECT  SiteName, VisitSiteDate as VisitDate , count(*) as num_visits, 0 as revenue
 FROM visitsite
-GROUP BY SiteName,VisitSiteDate;
-
-DROP VIEW IF EXISTS event_visit_counts;
-
-CREATE VIEW event_visit_counts AS
-SELECT  event.SiteName as SiteName, visitevent.VisitEventDate as VisitDate, count(*) as event_visits, count(*)*event.EventPrice as revenue
+GROUP BY SiteName,VisitSiteDate
+UNION ALL
+SELECT  event.SiteName as SiteName, visitevent.VisitEventDate as VisitDate, count(*) as num_visits, count(*)*event.EventPrice as revenue
 FROM event
 JOIN visitevent ON event.EventName = visitevent.EventName AND event.SiteName = visitevent.SiteName AND event.StartDate = visitevent.StartDate
 GROUP BY event.EventName, event.SiteName, event.StartDate, event.EndDate,visitevent.VisitEventDate;
-
-DROP VIEW IF EXISTS daily_event_visits;
-
-CREATE VIEW daily_event_visits AS
-SELECT SiteName, VisitDate, SUM(event_visits)as event_visits, SUM(revenue)as revenue
-FROM event_visit_counts
-GROUP BY SiteName, VisitDate;
 
 DROP VIEW IF EXISTS site_staff_counts;
 
@@ -636,27 +625,21 @@ JOIN staff_assignment ON event.EventName = staff_assignment.EventName AND event.
 GROUP BY event.SiteName, event.StartDate, event.EndDate;
 /* Created required views */
 
-SELECT site_visit_counts.VisitDate,  (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) as total_visits, IFNULL(daily_event_visits.revenue,0) as revenue, IFNULL(site_staff_counts.num_staff,0) as staff_count, IFNULL(site_event_counts.num_events,0) as event_count
-FROM site_visit_counts
-LEFT JOIN site_staff_counts ON site_visit_counts.SiteName = site_staff_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_staff_counts.StartDate and site_staff_counts.EndDate
-LEFT JOIN site_event_counts ON site_visit_counts.SiteName = site_event_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_event_counts.StartDate and site_event_counts.EndDate
-RIGHT JOIN daily_event_visits ON daily_event_visits.SiteName = site_visit_counts.SiteName AND daily_event_visits.VisitDate = site_visit_counts.VisitDate
-WHERE site_visit_counts.SiteName = SName
-AND site_visit_counts.VisitDate BETWEEN SDate AND EDate
-AND IFNULL(daily_event_visits.revenue,0) BETWEEN RrangeL AND RrangeU
-AND (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) BETWEEN VrangeL AND VrangeU
-UNION
-SELECT site_visit_counts.VisitDate,  (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) as total_visits, IFNULL(daily_event_visits.revenue,0) as revenue, IFNULL(site_staff_counts.num_staff,0) as staff_count, IFNULL(site_event_counts.num_events,0) as event_count
-FROM site_visit_counts
-LEFT JOIN site_staff_counts ON site_visit_counts.SiteName = site_staff_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_staff_counts.StartDate and site_staff_counts.EndDate
-LEFT JOIN site_event_counts ON site_visit_counts.SiteName = site_event_counts.SiteName AND site_visit_counts.VisitDate BETWEEN site_event_counts.StartDate and site_event_counts.EndDate
-LEFT JOIN daily_event_visits ON daily_event_visits.SiteName = site_visit_counts.SiteName AND daily_event_visits.VisitDate = site_visit_counts.VisitDate
-WHERE site_visit_counts.SiteName = SName
-AND site_visit_counts.VisitDate BETWEEN SDate AND EDate
-AND IFNULL(daily_event_visits.revenue,0) BETWEEN RrangeL AND RrangeU
-AND (IFNULL(site_visit_counts.site_visits,0) + IFNULL(daily_event_visits.event_visits,0)) BETWEEN VrangeL AND VrangeU;
-
- END //
+SELECT total_visit_counts.VisitDate, SUM(site_event_counts.num_events) as event_count, SUM(site_staff_counts.num_staff) as staff_count, sum(total_visit_counts.num_visits) as total_visits, sum(total_visit_counts.revenue) as total_revenue
+FROM total_visit_counts
+LEFT JOIN site_staff_counts ON total_visit_counts.SiteName = site_staff_counts.SiteName AND total_visit_counts.VisitDate BETWEEN site_staff_counts.StartDate and site_staff_counts.EndDate
+LEFT JOIN site_event_counts ON total_visit_counts.SiteName = site_event_counts.SiteName AND total_visit_counts.VisitDate BETWEEN site_event_counts.StartDate and site_event_counts.EndDate
+GROUP BY total_visit_counts.VisitDate HAVING VisitDate BETWEEN SDate AND EDate
+AND sum(total_visit_counts.num_visits) BETWEEN VrangeL AND VrangeU
+AND sum(total_visit_counts.revenue) BETWEEN RrangeL AND RrangeU
+AND VisitDate IN (
+	SELECT DISTINCT VisitDate
+    FROM total_visit_counts
+	LEFT JOIN site_staff_counts ON total_visit_counts.SiteName = site_staff_counts.SiteName AND total_visit_counts.VisitDate BETWEEN site_staff_counts.StartDate and site_staff_counts.EndDate
+	LEFT JOIN site_event_counts ON total_visit_counts.SiteName = site_event_counts.SiteName AND total_visit_counts.VisitDate BETWEEN site_event_counts.StartDate and site_event_counts.EndDate
+    WHERE site_staff_counts.num_staff BETWEEN SCrangeL AND SCrangeU
+    AND site_event_counts.num_events BETWEEN ECrangeL AND ECrangeU);
+    END //
 DELIMITER ;
 
 /* Screen 30 - Manager Daily Detail */
@@ -667,7 +650,28 @@ CREATE PROCEDURE s30_mgr_daily_detail(IN
   SDate date)
 BEGIN
 
-CREATE VIEW
+DROP VIEW IF EXISTS event_visit_counts;
+
+CREATE VIEW event_visit_counts AS
+SELECT  event.EventName as EventName,event.SiteName as SiteName,event.StartDate as StartDate, visitevent.VisitEventDate as VisitDate, count(*) as num_visits, count(*)*event.EventPrice as revenue
+FROM event
+JOIN visitevent ON event.EventName = visitevent.EventName AND event.SiteName = visitevent.SiteName AND event.StartDate = visitevent.StartDate
+GROUP BY event.EventName, event.SiteName, event.StartDate, event.EndDate,visitevent.VisitEventDate;
+
+DROP VIEW IF EXISTS event_staff_assignments;
+
+CREATE VIEW event_staff_assignments AS
+SELECT event.EventName, event.SiteName, event.StartDate, event.EndDate, CONCAT(user.Firstname,' ',user.Lastname) as staff_name
+FROM staff_assignment
+JOIN event ON event.EventName = staff_assignment.EventName AND event.SiteName = staff_assignment.SiteName AND event.StartDate = staff_assignment.StartDate
+JOIN user ON staff_assignment.StaffUsername = user.Username;
+
+SELECT event.EventName, GROUP_CONCAT(event_staff_assignments.staff_name SEPARATOR ', '), SUM(event_visit_counts.num_visits) AS total_visits, SUM(event_visit_counts.revenue) AS total_revenue
+JOIN event_visit_counts ON event.EventName = event_visit_counts.EventName AND event.SiteName = event_visit_counts.SiteName AND event.StartDate = event_visit_counts.StartDate
+JOIN event_staff_assignments ON event.EventName = event_staff_assignments.EventName AND event.SiteName = event_staff_assignments.SiteName AND event.StartDate = event_staff_assignments.StartDate
+WHERE event_visit_counts.VisitDate = SDate
+AND event_staff_assignments.SiteName = SName
+GROUP BY event.EventName, event.StartDate
 
 END //
 DELIMITER ;
