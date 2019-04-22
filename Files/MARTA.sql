@@ -12,11 +12,12 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s01_user_login_check_password(IN
   EMailID VARCHAR(50),
-  Pass VARCHAR(25))
+  Pass VARCHAR(200))
 BEGIN
+	set @hashp = MD5(Pass);
 	SELECT UserType, Status
     FROM user
-    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = Pass;
+    WHERE Username in (SELECT Username FROM emails WHERE Email = EMailID) AND Password = @hashp;
  END //
 DELIMITER ;
 
@@ -36,12 +37,13 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s03_register_user(IN
   UName VARCHAR(50),
-  Pass VARCHAR(25),
+  Pass VARCHAR(200),
   UType ENUM('Visitor','User'),
   FName VARCHAR(50),
   LName VARCHAR(50))
  BEGIN
- INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ set @hashp = MD5(Pass);
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,@hashp,'Pending',FName,LName,UType);
  END //
 DELIMITER ;
 
@@ -62,10 +64,11 @@ CREATE PROCEDURE s04_add_email(IN UName VARCHAR(50),
 DELIMITER ;
 
 DELIMITER //
-CREATE PROCEDURE s04_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+CREATE PROCEDURE s04_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(200),FName VARCHAR(50),LName VARCHAR(50))
 BEGIN
+set @hashp = MD5(Pass);
 INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
-VALUES(UName, Pass, 'Pending', 'Visitor', FName, LName);
+VALUES(UName, @hashp, 'Pending', 'Visitor', FName, LName);
 END //
 DELIMITER;
 
@@ -75,7 +78,7 @@ DELIMITER;
 DELIMITER //
 CREATE PROCEDURE s05_register_employee(IN
   UName VARCHAR(50),
-  Pass VARCHAR(25),
+  Pass VARCHAR(200),
   UType VARCHAR(50),
   FName VARCHAR(50),
   LName VARCHAR(50),
@@ -87,7 +90,8 @@ CREATE PROCEDURE s05_register_employee(IN
   EZipcode CHAR(5),
   EType ENUM('Manager','Staff','Admin'))
  BEGIN
- INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ set @hashp = MD5(Pass);
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,@hashp,'Pending',FName,LName,UType);
  INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
  END //
 DELIMITER ;
@@ -96,7 +100,7 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s06_register_employee_visitor(IN
   UName VARCHAR(50),
-  Pass VARCHAR(25),
+  Pass VARCHAR(200),
   UType VARCHAR(50),
   FName VARCHAR(50),
   LName VARCHAR(50),
@@ -108,7 +112,8 @@ CREATE PROCEDURE s06_register_employee_visitor(IN
   EZipcode CHAR(5),
   EType ENUM('Manager','Staff','Admin'))
  BEGIN
- INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ set @hashp = MD5(Pass);
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,@hashp,'Pending',FName,LName,UType);
  INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
  END //
 DELIMITER ;
