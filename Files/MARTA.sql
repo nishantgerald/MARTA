@@ -348,8 +348,20 @@ BEGIN
 DELETE FROM site
 WHERE SiteName = name;
 END //
-DELIMITER;
+DELIMITER ;
+
 /* Screen 20 - Administrator Edit Site */
+DELIMITER //
+CREATE PROCEDURE s20_get_managers(IN 
+siteName VARCHAR(50))
+
+BEGIN
+SELECT CONCAT(user.FirstName, ' ', user.LastName)
+FROM user
+WHERE user.Username NOT IN ( SELECT site.ManagerUsername FROM site) 
+AND user.Username = (SELECT site.ManagerUserName FROM site WHERE site.SiteName = siteName) ;
+END //
+DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s20_edit_site(IN
