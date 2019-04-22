@@ -747,7 +747,7 @@ CREATE PROCEDURE s33_explore_event(IN
  FROM visitevent
  GROUP BY EventName,SiteName,StartDate,VisitorUsername;
 
- SELECT visitevent.EventName, visitevent.SiteName, EventPrice, event.Capacity - count(*) as TixRemaining, Count(*) as TVisits, user_visits.myvisits
+ SELECT visitevent.EventName, visitevent.SiteName, event.StartDate, EventPrice, event.Capacity - count(*) as TixRemaining, Count(*) as TVisits, user_visits.myvisits
  FROM event
  JOIN visitevent on visitevent.EventName = event.EventName AND visitevent.SiteName = event.SiteName AND visitevent.StartDate = event.StartDate
  JOIN user_visits on user_visits.EventName = event.EventName AND user_visits.SiteName = event.SiteName AND user_visits.StartDate = event.StartDate
@@ -913,7 +913,7 @@ sName VARCHAR(50))
 BEGIN
 SELECT SiteName as Site, OpenEveryday, CONCAT(SiteAddress, ', Atlanta, GA ', SiteZipcode) as Address
 FROM site
-WHERE site.SiteName = sname; 
+WHERE site.SiteName = sname;
 END //
 DELIMITER ;
 
