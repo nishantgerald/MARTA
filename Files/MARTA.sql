@@ -780,7 +780,19 @@ CREATE PROCEDURE s33_explore_event(IN
  END //
 DELIMITER ;
 
-/* Screen 34 - Log visit */
+/* Screen 34 - Visitor Event Detail */
+#Get event detail
+DELIMITER //
+CREATE PROCEDURE s34_event_detail(IN eName VARCHAR(100), sName VARCHAR(50), startDate DATE, tixRemaining INT)
+BEGIN
+
+SELECT EventName as Event, SiteName as Site, StartDate, EndDate, EventPrice as TicketPrice, tixRemaining as TicketsRemaining, Description
+FROM Event
+WHERE event.EventName = eName AND event.SiteName = sName AND event.StartDate = startDate;
+END //
+DELIMITER ;
+
+#Log Visit Event
 DELIMITER //
 CREATE PROCEDURE s34_log_event_visit(IN
   UName VARCHAR(50),
