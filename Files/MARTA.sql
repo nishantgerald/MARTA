@@ -273,6 +273,22 @@ WHERE
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s19_manager_list()
+BEGIN
+SELECT CONCAT(FirstName, ' ', LastName)
+FROM user
+WHERE UserName in (SELECT UserName FROM employee WHERE EmployeeType = 'Manager');
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s19_delete_site(IN name VARCHAR(50))
+BEGIN
+DELETE FROM site
+WHERE SiteName = name;
+END //
+DELIMITER;
 /* Screen 20 - Administrator Edit Site */
 
 DELIMITER //
@@ -310,6 +326,17 @@ INSERT INTO site(Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUserna
 
 END //
 DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s21_manager_not_assigned()
+BEGIN
+SELECT CONCAT(FirstName, ' ', LastName)
+FROM user
+WHERE Username in (SELECT Username FROM employee WHERE EmployeeType = 'Manager') 
+AND Username not in (SELECT DISTINCT ManagerUsername FROM site);
+END //
+DELIMITER;
+
 
 /* Screen 22 - Administrator Manage Transit */
 /*MANAGE TRANSIT - Page 22 DeleteTransit removes a transit entry from transit table*/
