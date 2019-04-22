@@ -337,7 +337,6 @@ AND Username not in (SELECT DISTINCT ManagerUsername FROM site);
 END //
 DELIMITER;
 
-
 /* Screen 22 - Administrator Manage Transit */
 /*MANAGE TRANSIT - Page 22 DeleteTransit removes a transit entry from transit table*/
 DELIMITER //
@@ -439,6 +438,15 @@ WHERE transit.TransitRoute = OldRoute AND transit.TransitType = TType;
 END //
 DELIMITER;
 
+DELIMITER //
+CREATE PROCEDURE s23_site_list(IN Route VARCHAR(20))
+BEGIN
+SELECT SiteName
+FROM connect
+WHERE TransitRoute = Route;
+END //
+DELIMITER;
+
 /* Screen 24 - Administrator Create Transit */
 
 /* Page 24 Create Transit */
@@ -452,6 +460,7 @@ INSERT INTO transit(TransitType, TransitRoute, TransitPrice)
 VALUES (TType, Route, Price);
 END //
 DELIMITER;
+
 
 /* Screen 25 - Manager Manage Event */
 /*#MANAGE EVENT - Page 25
@@ -572,6 +581,15 @@ BEGIN
 UPDATE event
 SET Description = Descr
 WHERE EventName = EName and StartDate = SDate and SiteName = SName;
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s26_staff_at_event(Name VARCHAR(100))
+BEGIN
+SELECT CONCAT(Firstname, ' ', Lastname)
+FROM user
+WHERE Username in (SELECT StaffUsername FROM staff_assignment WHERE EventName = Name);
 END //
 DELIMITER;
 
