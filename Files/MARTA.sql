@@ -317,8 +317,8 @@ BEGIN
   SET Status = UStat
   
   WHERE Username = UName;
-  UPDATE employee 
-  SET EmployeeID = @EID 
+  UPDATE employee
+  SET EmployeeID = @EID
   WHERE Username = UName;
  END //
 DELIMITER ;
@@ -644,7 +644,6 @@ DELIMITER;
 #AddStaff adds staff entry to staff_assignment table
 #UpdateDescription updates description in event table*/
 
-#Get top event details
 DELIMITER //
 CREATE PROCEDURE s26_get_details(IN
 EName VARCHAR(50),
@@ -657,7 +656,7 @@ WHERE event.EventName = EName AND event.StartDate = SDate AND event.SiteName = S
 END //
 DELIMITER ;
 
-#Get assigned staff
+
 DELIMITER //
 CREATE PROCEDURE s26_get_staff(IN
 EName VARCHAR(50),
