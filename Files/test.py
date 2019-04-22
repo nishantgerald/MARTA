@@ -3,9 +3,11 @@ from flask import Flask, session, redirect, url_for, escape, request, render_tem
 import json
 from flask_table import Table, Col, ButtonCol, LinkCol
 
+#Declare app, and make sure it refreshes
 app = Flask(__name__, template_folder='template')
 app.config['TEMPLATES_AUTO_RELOAD'] = True
 
+#Declare global variables (to be carried across screens)
 global user_email
 global user_type
 global employee_type
@@ -15,6 +17,7 @@ global site_list
 global transit_type_list
  
 def make_db_connection():
+    #creates the connection to the local database - need to check best practice on when/how often in the script to do this (new connection for every screen?)
     connection = pymysql.connect(host='localhost',
                              user='root',
                              password='root',
@@ -24,14 +27,17 @@ def make_db_connection():
     return connection
 
 def close_db_connection(connection):
+    #Closes the database connection
     connection.close()
 
 @app.route('/')
 def index():
+    #shows the login page
     return render_template('/s01_login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    #processes the login credentials and directs to the appropriate navigation page
     global employee_type
     global user_email
     global password
@@ -468,7 +474,9 @@ def employee_manage_profile():
 
 
 if __name__ == '__main__':
+    session.start()
     app.run(debug=True)
+    session.close()
 
 
 
