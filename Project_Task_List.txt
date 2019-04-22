@@ -1,29 +1,27 @@
 ﻿CS 4400 Phase 3 Task List
 
 Screen 1: User Login
-Task 1: If login selected, check if users email exists
+Task 1: Check if users email exists
 	-s01_user_login_check_email
 Task 2: See if entered password matches stored (hashed) password corresponding to the email
-	-
-Task 3: If register selected, redirect to screen 2
-	-
+	-s01_user_login_check_password
 
 Screen 2: Register Navigation
 Navigation only
 
 Screen 3: Register User
 Task 1: Add entry into the user table
-	-
+	-s03_register_user
 
 Screen 4: Register Visitor
 Task 1: Add entry into user table
 	-
 Task 2: Add one or more entries to emails table
-	-
+	-s03_add_email
 
 Screen 5: Register Employee
 Task 1: Add entry into user table
-	-
+	-s05_register_employee
 Task 2: Add one or more entries to emails table
 	-
 
@@ -39,7 +37,7 @@ Screen 15: Take Transit
 Task 1: Return all existing sites from site table
 	-
 Task 2: Return rows matching filter criteria
-	-
+	-s15_get_route
 Task 3: Add entry to take table
 	-
 
@@ -48,11 +46,12 @@ Task 3: Add entry to take table
 
  
 
+
 Screen 16: Transit History
 Task 1: Return rows matching filter criteria
 	-
 Task 2: Return all existing sites from site table
-	- 
+	- s16_transit_history
 
 
 Screen 17: Manage Profile
@@ -63,9 +62,9 @@ Task 2: Add or remove entries from emails table
 
 Screen 18: Manage User
 Task 1: Return rows matching filter criteria
-	-
+	-s18_manage_user
 Task 2: Update status in user table
-	-
+	-s18_user_status_update
 
 Screen 19: Manage Site
 Task 1: Return list of managers
@@ -73,7 +72,7 @@ Task 1: Return list of managers
 Task 2: Return list of sites
 	-
 Task 3: Return rows matching filter criteria	
-	-
+	-s19_manage_site
 Task 4: Delete all records containing the selected site from all tables
 	-
 
@@ -82,13 +81,14 @@ Screen 20: Edit Site
 Task 1: Return list of managers
 	-
 Task 2: Update entry in site table
-	-
+	-s20_edit_site
 
 Screen 21: Create Site
 Task 1: Return list of managers who have not been assigned to a site
 	-
 Task 2: Add entry to site table
-	-
+	-s21_create_site
+
 
 
 
@@ -100,17 +100,19 @@ Screen 22: Manage Transit
 Task 1: Return list of sites
 	-
 Task 2: Return rows matching filter criteria	
-	-
+	-s22_manage_transit
 Task 3: Delete all records containing the selected site from all tables
-	-
+	-s22_delete_transit
 
 Screen 23: Edit Transit
 Task 1: Return list of sites connected to entered transit route
 	-
 Task 2: Remove all sites connect to entered transit
-	-
+	-s23_delete_sites
 Task 3: Add entries to connect table
-	-
+	-s23_add_sites
+Task 4: Change price in transit table
+	-s23_edit_price
 
 Screen 24: Create Transit
 Task 1: Return list of sites

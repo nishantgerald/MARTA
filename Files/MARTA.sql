@@ -77,7 +77,25 @@ CREATE PROCEDURE s05_register_employee(IN
 DELIMITER ;
 
 /* Screen 06 - Register Employee-Visitor*/
-
+DELIMITER //
+CREATE PROCEDURE s06_register_employee_visitor(IN
+  UName VARCHAR(50),
+  Pass VARCHAR(25),
+  UType VARCHAR(50),
+  FName VARCHAR(50),
+  LName VARCHAR(50),
+  EID CHAR(9),
+  Phone VARCHAR(20),
+  EAddress VARCHAR(100),
+  ECity VARCHAR(50),
+  EState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other'),
+  EZipcode CHAR(5),
+  EType ENUM('Manager','Staff','Admin'))
+ BEGIN
+ INSERT INTO user(Username,Password,Status,Firstname,Lastname,UserType) VALUES (UName,Pass,'Pending',FName,LName,UType);
+ INSERT INTO employee(Username,EmployeeID,Phone,EmployeeAddress,EmployeeCity,EmployeeState,EmployeeZipcode,EmployeeType) VALUES (UName,EID,Phone,EAddress,ECity,EState,EZipcode,EType);
+ END //
+DELIMITER ;
 /* Screens 7-4 - Functionality/Navigation Screens */
 
 /* Screen 15 - User Take Transit */
@@ -144,6 +162,17 @@ DELIMITER ;
 
 
 /* Screen 17 - Employee Manage Profile */
+DELIMITER //
+CREATE PROCEDURE s17_manage_profile(IN username VARCHAR(50),fname VARCHAR(50), lname VARCHAR(50), phone VARCHAR(20))
+BEGIN
+UPDATE user
+SET user.Firstname=fname,user.Lastname=lname
+WHERE user.Username=username;
+UPDATE employee
+SET employee.Phone=phone
+WHERE employee.Username=username;
+END //
+DELIMITER ;
 
 /* Screen 18 - Administrator Manage User */
 
@@ -848,25 +877,26 @@ CREATE PROCEDURE s35_explore_site(IN
    END //
   DELIMITER ;
 
-#DELIMITER //
-#CREATE PROCEDURE SelectSite(IN OpenErrday ENUM('Yes','No'), )
-
 /* Screen 36 - Visitor Transit Detail */
-#TransitDetail gets the route, transit type, and price info
-#ConnectedSites gets num of connected sites
-#LogTransit logs a transit in transit table
-
+#First get the table info
 DELIMITER //
-CREATE PROCEDURE s36_transit_detail(In TType ENUM('MARTA','Bus','Bike'))
+CREATE PROCEDURE s36_transit_detail(IN TType ENUM('MARTA','Bus','Bike'), sName VARCHAR(50))
 BEGIN
-Select TransitType, TransitRoute, TransitPrice
+DROP VIEW IF EXISTS conn_site_counts;
+
+CREATE VIEW conn_site_counts AS
+SELECT  TransitType, TransitRoute, count(*) as conn_sites
+FROM connect;
+
+SELECT transit.TransitRoute as Route, transit.TransitType as TransportType, transit.TransitPrice as Price, conn_site_counts.conn_sites as NumConnectedSites
 FROM transit
-WHERE TransitType = TType;
+JOIN connect ON transit.TransitRoute = connect.TransitRoute AND transit.TransitType = connect.TransitType
+JOIN conn_site_counts on transit.TransitRoute = conn_site_counts.TransitRoute AND transit.transitType = conn_site_counts.TransitType
+WHERE transit.TransitType = TType AND connect.siteName = sName;
 END //
-DELIMITER;
+DELIMITER ;
 
-#Use ConnectedSites from above
-
+#Log transit
 DELIMITER //
 CREATE PROCEDURE s36_log_transit(In TDate DATE, TType ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), UserN VARCHAR(50))
 BEGIN
@@ -876,12 +906,23 @@ END //
 DELIMITER;
 
 /* Screen 37 - Visitor Site Detail */
-#LogSiteVisit adds a log entry to visitsite table*/
+/*Display the site details*/
 DELIMITER //
-CREATE PROCEDURE LogSiteVisit(IN VisitDate DATE, Nombre VARCHAR(50), Username VARCHAR(50))
+CREATE PROCEDURE s37_view_site_detail(IN
+sName VARCHAR(50))
+BEGIN
+SELECT SiteName as Site, OpenEveryday, CONCAT(SiteAddress, ', Atlanta, GA ', SiteZipcode) as Address
+FROM site
+WHERE site.SiteName = sname; 
+END //
+DELIMITER ;
+
+/*LogSiteVisit adds a log entry to visitsite table*/
+DELIMITER //
+CREATE PROCEDURE s37_log_site_visit(IN VisitDate DATE, Name VARCHAR(50), Username VARCHAR(50))
 BEGIN
 INSERT INTO visitsite (VisitSiteDate, SiteName, VisitorUsername)
-VALUES (VisitDate, Nombre, Username);
+VALUES (VisitDate, Name, Username);
 END //
 DELIMITER;
 
@@ -892,7 +933,34 @@ CREATE PROCEDURE s38_get_sites()
 BEGIN
 SELECT DISTINCT SiteName from site;
 END //
-DELIMITER;
+DELIMITER ;
 
 #Display Table
-CREATE PROCEDURE s38(IN
+DELIMITER //
+CREATE PROCEDURE s38_display_visit_history(IN
+eName VARCHAR(100),
+sName VARCHAR(50),
+startDate DATE,
+endDate DATE)
+BEGIN
+SELECT visitevent.VisitEventDate as Date, visitevent.EventName as Event, visitevent.SiteName as Site, event.EventPrice as Price
+FROM visitEvent
+JOIN event ON visitEvent.StartDate = Event.StartDate AND visitEvent.EventName = event.EventName AND visitEvent.SiteName = Event.SiteName
+WHERE
+CASE WHEN eName IS NULL
+   THEN visitevent.EventName=visitevent.EventName
+   ELSE visitevent.EventName LIKE CONCAT('%', eName, '%') END
+   AND CASE WHEN sName IS NULL
+   THEN visitevent.SiteName=visitevent.SiteName
+   ELSE visitevent.SiteName = eName END
+   AND visitEvent.VisitEventDate BETWEEN startDate AND endDate
+UNION
+SELECT visitsite.VisitSiteDate as Date, visitsite.SiteName as Site, 0 as Price, NULL as Event
+FROM visitSite
+JOIN event ON visitSite.SiteName = Event.SiteName
+WHERE
+CASE WHEN sName IS NULL
+   THEN visitsite.SiteName=visitsite.SiteName
+   ELSE visitsite.SiteName = sName END;
+END //
+DELIMITER ;
