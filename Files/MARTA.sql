@@ -134,6 +134,14 @@ GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitT
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s15_get_sites()
+BEGIN
+SELECT DISTINCT SiteName
+FROM site;
+END //
+DELIMITER;
+
 /* Screen 16 - User Transit History */
 
 DELIMITER //
