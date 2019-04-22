@@ -855,9 +855,16 @@ DELIMITER ;
 DELIMITER //
 CREATE PROCEDURE s36_transit_detail(IN TType ENUM('MARTA','Bus','Bike'), sName VARCHAR(50))
 BEGIN
-SELECT transit.TransitRoute as Route, transit.TransitType as TransportType, transit.TransitPrice as Price
+DROP VIEW IF EXISTS conn_site_counts;
+
+CREATE VIEW conn_site_counts AS
+SELECT  TransitType, TransitRoute, count(*) as conn_sites
+FROM connect;
+
+SELECT transit.TransitRoute as Route, transit.TransitType as TransportType, transit.TransitPrice as Price, conn_site_counts.conn_sites as NumConnectedSites
 FROM transit
 JOIN connect ON transit.TransitRoute = connect.TransitRoute AND transit.TransitType = connect.TransitType
+JOIN conn_site_counts on transit.TransitRoute = conn_site_counts.TransitRoute AND transit.transitType = conn_site_counts.TransitType
 WHERE transit.TransitType = TType AND connect.siteName = sName;
 END //
 DELIMITER ;
