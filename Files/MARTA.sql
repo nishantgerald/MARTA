@@ -45,6 +45,13 @@ CREATE PROCEDURE s03_register_user(IN
  END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s03_remove_email(IN UName VARCHAR(50), EMail VARCHAR(50))
+BEGIN
+DELETE FROM emails
+WHERE Username = UName AND Email = EMail;
+END //
+
 /* Screen 04- Register Visitor Only */
 DELIMITER //
 CREATE PROCEDURE s04_add_email(IN UName VARCHAR(50),
@@ -197,7 +204,8 @@ UPDATE employee
 SET employee.Phone=phone
 WHERE employee.Username=username;
 END //
-DELIMITER ;
+DELIMITER;
+
 
 /* Screen 18 - Administrator Manage User */
 
