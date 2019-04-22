@@ -21,11 +21,11 @@ CREATE TABLE emails
 CREATE TABLE employee
 (
   EmployeeID CHAR(9) NOT NULL,
-  Phone VARCHAR(20) NOT NULL,
+  Phone DECIMAL(10,0) NOT NULL,
   EmployeeAddress VARCHAR(100) NOT NULL,
   EmployeeCity VARCHAR(50) NOT NULL,
   EmployeeState ENUM('AK', 'AL', 'AR', 'AZ', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA', 'HI', 'IA', 'ID', 'IL', 'IN', 'KS', 'KY', 'LA', 'MA', 'MD', 'ME', 'MI','MN', 'MO', 'MS', 'MT', 'NC', 'ND', 'NE', 'NH', 'NJ', 'NM', 'NV', 'NY', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC', 'SD', 'TN', 'TX', 'UT', 'VA', 'VT', 'WA', 'WI', 'WV', 'WY','other') NOT NULL,
-  EmployeeZipcode CHAR(5) NOT NULL,
+  EmployeeZipcode DECIMAL(5,0) NOT NULL,
   EmployeeType ENUM('Manager','Staff','Admin') NOT NULL,
   Username VARCHAR(50) NOT NULL,
   PRIMARY KEY (EmployeeID),
@@ -39,7 +39,7 @@ CREATE TABLE site
 (
   SiteName VARCHAR(50) NOT NULL,
   SiteAddress VARCHAR(100),
-  SiteZipcode CHAR(5) NOT NULL,
+  SiteZipcode DECIMAL(5,0) NOT NULL,
   OpenEveryday ENUM('Yes','No') NOT NULL,
   ManagerUsername VARCHAR(50) NOT NULL,
   PRIMARY KEY (SiteName),
