@@ -617,6 +617,20 @@ WHERE EventName = EName and StartDate = SDate and SiteName = SName;
 END //
 DELIMITER;
 
+#Get assigned staff
+DELIMITER //
+CREATE PROCEDURE s26_get_event_days(IN 
+EName VARCHAR(50),
+SDate DATE,
+SName VARCHAR(50))
+BEGIN
+  SELECT visitevent.VisitEventDate as Date, COUNT(*) as DailyVisits, COUNT(*) *  event.EventPrice
+  FROM visitevent
+  JOIN event ON event.EventName = visitevent.EventName AND event.SiteName = visitevent.SiteName AND event.StartDate = visitevent.StartDate
+  WHERE visitevent.EventName = EName AND visitevent.StartDate = SDate AND visitevent.SiteName = SName
+  GROUP BY visitevent.VisitEventDate;
+END //
+DELIMITER ;
 
 /* Screen 27 - Manager Create Event */
 
