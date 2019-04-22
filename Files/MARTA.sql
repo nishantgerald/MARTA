@@ -45,14 +45,30 @@ CREATE PROCEDURE s03_register_user(IN
  END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s03_remove_email(IN UName VARCHAR(50), EMail VARCHAR(50))
+BEGIN
+DELETE FROM emails
+WHERE Username = UName AND Email = EMail;
+END //
+
 /* Screen 04- Register Visitor Only */
 DELIMITER //
-CREATE PROCEDURE s03_add_email(IN UName VARCHAR(50),
+CREATE PROCEDURE s04_add_email(IN UName VARCHAR(50),
   EMail VARCHAR(50))
  BEGIN
  INSERT INTO emails(Username,Email) VALUES (UName,EMail);
  END //
 DELIMITER ;
+
+DELIMITER //
+CREATE PROCEDURE s04_register_visitor(IN UName VARCHAR(50),Pass VARCHAR(25),FName VARCHAR(50),LName VARCHAR(50))
+BEGIN
+INSERT INTO user(Username, Password, Status, UserType, Firstname, Lastname)
+VALUES(UName, Pass, 'Pending', 'Visitor', FName, LName);
+END //
+DELIMITER;
+
 
 /* Screen 05 - Register Employee Only */
 
@@ -125,6 +141,22 @@ GROUP BY transit.TransitType,transit.TransitRoute HAVING CONCAT(transit.TransitT
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s15_get_sites()
+BEGIN
+SELECT DISTINCT SiteName
+FROM site;
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s15_log_transit(IN Date DATE, Type ENUM('MARTA','Bus','Bike'), Route VARCHAR(20), Name VARCHAR(50))
+BEGIN
+INSERT INTO take(TransitDate, TransitType, TransitRoute, Username)
+VALUES(Date, Type, Route, Name);
+END //
+DELIMITER;
+
 /* Screen 16 - User Transit History */
 
 DELIMITER //
@@ -172,7 +204,8 @@ UPDATE employee
 SET employee.Phone=phone
 WHERE employee.Username=username;
 END //
-DELIMITER ;
+DELIMITER;
+
 
 /* Screen 18 - Administrator Manage User */
 
@@ -240,6 +273,22 @@ WHERE
 END //
 DELIMITER ;
 
+DELIMITER //
+CREATE PROCEDURE s19_manager_list()
+BEGIN
+SELECT CONCAT(FirstName, ' ', LastName)
+FROM user
+WHERE UserName in (SELECT UserName FROM employee WHERE EmployeeType = 'Manager');
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s19_delete_site(IN name VARCHAR(50))
+BEGIN
+DELETE FROM site
+WHERE SiteName = name;
+END //
+DELIMITER;
 /* Screen 20 - Administrator Edit Site */
 
 DELIMITER //
@@ -275,6 +324,16 @@ BEGIN
 SET @Mgrname=(SELECT UserName FROM user WHERE user.Firstname=Fname AND user.Lastname=Lname);
 INSERT INTO site(Sitename, SiteAddress, SiteZipcode, OpenEveryday, ManagerUsername) VALUES (SName, SAddress, SZipcode, open_everyday, @Mgrname);
 
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s21_manager_not_assigned()
+BEGIN
+SELECT CONCAT(FirstName, ' ', LastName)
+FROM user
+WHERE Username in (SELECT Username FROM employee WHERE EmployeeType = 'Manager') 
+AND Username not in (SELECT DISTINCT ManagerUsername FROM site);
 END //
 DELIMITER;
 
@@ -363,7 +422,7 @@ CREATE PROCEDURE s23_edit_price(IN
 BEGIN
 UPDATE transit
 SET transit.TransitPrice = Price
-WHERE connect.TransitRoute = Route AND connect.TransitType = TType;
+WHERE transit.TransitRoute = Route AND transit.TransitType = TType;
 END //
 DELIMITER;
 
@@ -375,11 +434,22 @@ CREATE PROCEDURE s23_edit_route(IN
 BEGIN
 UPDATE transit
 SET transit.TransitRoute = Route
-WHERE connect.TransitRoute = OldRoute AND connect.TransitType = TType;
+WHERE transit.TransitRoute = OldRoute AND transit.TransitType = TType;
+END //
+DELIMITER;
+
+DELIMITER //
+CREATE PROCEDURE s23_site_list(IN Route VARCHAR(20))
+BEGIN
+SELECT SiteName
+FROM connect
+WHERE TransitRoute = Route;
 END //
 DELIMITER;
 
 /* Screen 24 - Administrator Create Transit */
+#get connected sites
+
 
 /* Page 24 Create Transit */
 DELIMITER //
@@ -392,6 +462,7 @@ INSERT INTO transit(TransitType, TransitRoute, TransitPrice)
 VALUES (TType, Route, Price);
 END //
 DELIMITER;
+
 
 /* Screen 25 - Manager Manage Event */
 /*#MANAGE EVENT - Page 25
@@ -445,10 +516,10 @@ JOIN event_visit_counts ON event.EventName = event_visit_counts.EventName AND ev
 WHERE
 CASE WHEN EName IS NULL
  THEN event.EventName=event.EventName
- ELSE event.EventName = EName END
+ ELSE event.EventName LIKE CONCAT('%',EName,'%') END
  AND CASE WHEN Keyword IS NULL
  THEN event.Description LIKE '%'
- ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
+ ELSE event.Description LIKE CONCAT('%',Keyword,'%') END
  AND event.SiteName = SName
  AND event_visit_counts.revenue BETWEEN RrangeL AND RrangeU
  AND event_visit_counts.total_visits BETWEEN VrangeL AND VrangeU
@@ -474,11 +545,40 @@ DELIMITER;
 #RemoveStaff removes staff entry from staff_assignment table
 #AddStaff adds staff entry to staff_assignment table
 #UpdateDescription updates description in event table*/
+
+#Get top event details
+DELIMITER //
+CREATE PROCEDURE s26_get_details(IN 
+EName VARCHAR(50),
+SDate DATE,
+SName VARCHAR(50))
+BEGIN
+SELECT event.EventName as Name, event.EventPrice as Price, event.StartDate as StartDate, event.EndDate as EndDate, event.MinStaffRequired as MinimumStaffRequired, event.Capacity as Capacity
+FROM event
+WHERE event.EventName = EName AND event.StartDate = SDate AND event.SiteName = SName;
+END //
+DELIMITER ;
+
+#Get assigned staff
+DELIMITER //
+CREATE PROCEDURE s26_get_staff(IN 
+EName VARCHAR(50),
+SDate DATE,
+SName VARCHAR(50))
+BEGIN
+  SELECT CONCAT(user.Firstname,' ',user.Lastname) as FullName
+  FROM user
+  JOIN staff_assignment ON user.Username = staff.StaffUsername
+  WHERE event.EventName = EName AND event.StartDate = SDate AND event.SiteName = SName;
+END //
+DELIMITER ;
+
+#remove unhighlighted staff
 DELIMITER //
 CREATE PROCEDURE s26_remove_staff(IN
   EName VARCHAR(50),
   SName VARCHAR(50),
-  SDate Date,
+  SDate DATE,
   Fname VARCHAR(50),
   Lname VARCHAR(50))
 BEGIN
@@ -488,6 +588,7 @@ WHERE EventName = EName AND StartDate = SDate AND SiteName = SName AND StaffUser
 END //
 DELIMITER;
 
+#add highlighted staff
 DELIMITER //
 CREATE PROCEDURE s26_add_staff(IN
   EName VARCHAR(50),
@@ -502,6 +603,7 @@ VALUES (@Staffname, EName, SName, SDate);
 END //
 DELIMITER;
 
+#Update description
 DELIMITER //
 CREATE PROCEDURE s26_update_description(IN
   EName VARCHAR(50),
@@ -514,6 +616,21 @@ SET Description = Descr
 WHERE EventName = EName and StartDate = SDate and SiteName = SName;
 END //
 DELIMITER;
+
+#Get assigned staff
+DELIMITER //
+CREATE PROCEDURE s26_get_event_days(IN 
+EName VARCHAR(50),
+SDate DATE,
+SName VARCHAR(50))
+BEGIN
+  SELECT visitevent.VisitEventDate as Date, COUNT(*) as DailyVisits, COUNT(*) *  event.EventPrice
+  FROM visitevent
+  JOIN event ON event.EventName = visitevent.EventName AND event.SiteName = visitevent.SiteName AND event.StartDate = visitevent.StartDate
+  WHERE visitevent.EventName = EName AND visitevent.StartDate = SDate AND visitevent.SiteName = SName
+  GROUP BY visitevent.VisitEventDate;
+END //
+DELIMITER ;
 
 /* Screen 27 - Manager Create Event */
 
@@ -547,6 +664,12 @@ END //
 DELIMITER ;
 
 /* Screen 28 - Manager Manage Staff */
+DELIMITER //
+CREATE PROCEDURE s28_get_sites()
+BEGIN
+SELECT DISTINCT SiteName from site;
+END //
+DELIMITER ;
 
 DELIMITER //
 CREATE PROCEDURE s28_mgr_manage_staff(IN
@@ -706,28 +829,33 @@ DELIMITER ;
 
 /* Screen 32 - Staff Event Detail */
 DELIMITER //
-CREATE PROCEDURE s32_event_detail(IN EName VARCHAR(50))
+CREATE PROCEDURE s32_event_detail(IN EName VARCHAR(50), SName VARCHAR(100), SDate DATE)
  BEGIN
- SELECT EventName, SiteName, StartDate, EndDate, DATEDIFF(EndDate,StartDate) as Duration_days, Capacity, EventPrice
-FROM event
-WHERE EventName = EName;
- END //
-DELIMITER ;
-
-DELIMITER //
-CREATE PROCEDURE s32_staff_assignment(IN EName VARCHAR(50))
- BEGIN
- SELECT concat(Firstname," ",Lastname)
+ 
+ DROP VIEW IF EXISTS assigned_staff;
+ 
+CREATE VIEW assigned_staff AS
+ SELECT concat(user.Firstname," ",user. Lastname) as FullName, staff_Assignment.EventName as EventName, staff_Assignment.StartDate as StartDate, staff_Assignment.SiteName as SiteName
  FROM user
- WHERE Username in (
-	SELECT StaffUsername
-	FROM staff_assignment
-	WHERE EventName = EName)
-;
+ JOIN staff_assignment ON user.Username = staff_assignment.StaffUsername;
+ 
+SELECT event.EventName, event.SiteName, event.StartDate, event.EndDate, DATEDIFF(event.EndDate,event.StartDate) as Duration_days, assigned_staff.FullName, event.Capacity, event.EventPrice, event.Description
+FROM event
+JOIN assigned_staff ON event.EventName = assigned_staff.EventName AND event.startDate = assigned_staff.StartDate AND event.SiteName = assigned_staff.SiteName
+WHERE event.EventName = EName AND event.SiteName = SName AND event.StartDate = SDate;
  END //
 DELIMITER ;
 
 /* Screen 33 - Staff Event Detail */
+/* Site name dropdown */
+DELIMITER //
+CREATE PROCEDURE s33_get_sites()
+BEGIN
+SELECT DISTINCT SiteName from site;
+END //
+DELIMITER ;
+
+/* get table */
 DELIMITER //
 CREATE PROCEDURE s33_explore_event(IN
   UName VARCHAR(50),
@@ -773,7 +901,7 @@ CREATE PROCEDURE s33_explore_event(IN
   ELSE event.SiteName = SName END
   AND CASE WHEN Keyword IS NULL
   THEN event.Description LIKE '%'
-  ELSE event.Description LIKE CONCAT ('%',Keyword,'%') END
+  ELSE event.Description LIKE CONCAT('%',Keyword,'%') END
   AND (event.StartDate BETWEEN SDate and EDate OR event.EndDate BETWEEN SDate and EDate)
   AND CASE WHEN include_visited = 'No'
   THEN CONCAT(event.EventName,event.SiteName, event.StartDate) NOT IN (
@@ -784,7 +912,18 @@ CREATE PROCEDURE s33_explore_event(IN
  END //
 DELIMITER ;
 
-/* Screen 34 - Log visit */
+/* Screen 34 - Visitor Event Detail */
+#Get event detail
+DELIMITER //
+CREATE PROCEDURE s34_event_detail(IN eName VARCHAR(100), sName VARCHAR(50), startDate DATE, tixRemaining INT)
+BEGIN
+SELECT EventName as Event, SiteName as Site, StartDate, EndDate, EventPrice as TicketPrice, tixRemaining as TicketsRemaining, Description
+FROM Event
+WHERE event.EventName = eName AND event.SiteName = sName AND event.StartDate = startDate;
+END //
+DELIMITER ;
+
+#Log Visit Event
 DELIMITER //
 CREATE PROCEDURE s34_log_event_visit(IN
   UName VARCHAR(50),
@@ -798,6 +937,15 @@ CREATE PROCEDURE s34_log_event_visit(IN
 DELIMITER ;
 
 /* Screen 35 - Visitor Explore Site */
+/* Site Name dropdown */
+DELIMITER //
+CREATE PROCEDURE s35_get_sites()
+BEGIN
+SELECT DISTINCT SiteName from site;
+END //
+DELIMITER ;
+
+/* Display table */
 DELIMITER //
 CREATE PROCEDURE s35_explore_site(IN
   UName VARCHAR(50),
