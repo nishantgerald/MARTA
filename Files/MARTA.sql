@@ -380,7 +380,7 @@ CREATE PROCEDURE s23_edit_price(IN
 BEGIN
 UPDATE transit
 SET transit.TransitPrice = Price
-WHERE connect.TransitRoute = Route AND connect.TransitType = TType;
+WHERE transit.TransitRoute = Route AND transit.TransitType = TType;
 END //
 DELIMITER;
 
@@ -392,7 +392,7 @@ CREATE PROCEDURE s23_edit_route(IN
 BEGIN
 UPDATE transit
 SET transit.TransitRoute = Route
-WHERE connect.TransitRoute = OldRoute AND connect.TransitType = TType;
+WHERE transit.TransitRoute = OldRoute AND transit.TransitType = TType;
 END //
 DELIMITER;
 
