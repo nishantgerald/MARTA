@@ -770,56 +770,83 @@ CREATE PROCEDURE s35_explore_site(IN
   UName VARCHAR(50),
   SName VARCHAR(50),
   include_visited ENUM('Yes','No'),
+  SDate date,
+  EDate date,
+  VrangeL DECIMAL(7,0),
+  VrangeU DECIMAL(7,0),
   ECrangeL DECIMAL(7,0),
   ECrangeU DECIMAL(7,0))
  BEGIN
 
- CREATE VIEW site_event_counts AS
- SELECT SiteName, EventName, StartDate, EndDate, count(*) as num_events
- FROM event
- GROUP BY SiteName, EventName, StartDate, EndDate;
+  DROP VIEW IF EXISTS site_event_counts;
 
- DROP VIEW IF EXISTS site_visit_counts;
+  CREATE VIEW site_event_counts AS
+  SELECT SiteName,  count(*) as event_count
+  FROM event
+  GROUP BY SiteName;
 
- CREATE VIEW site_visit_counts AS
- SELECT  SiteName, VisitDate, count(*) as site_visits
- FROM visitsite
- GROUP BY SiteName, VisitDate;
+  DROP VIEW IF EXISTS site_visit_counts;
 
- DROP VIEW IF EXISTS event_visit_counts;
+  CREATE VIEW site_visit_counts AS
+  SELECT  SiteName, count(*) as site_visits
+  FROM visitsite
+  GROUP BY SiteName;
 
- CREATE VIEW event_visit_counts AS
- SELECT  SiteName, VisitDate count(*) as event_visits
- FROM visitevent
- GROUP BY SiteName, VisitDate;
+  DROP VIEW IF EXISTS event_visit_counts;
 
- DROP VIEW IF EXISTS total_visit_counts;
+  CREATE VIEW event_visit_counts AS
+  SELECT  SiteName, count(*) as event_visits
+  FROM visitevent
+  GROUP BY visitevent.SiteName;
 
- CREATE VIEW total_visit_counts AS
- SELECT event.SiteName, (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
- FROM site
- LEFT JOIN site_visit_counts ON site.SiteName = site_visit_counts.SiteName
- LEFT JOIN event_visit_counts ON site.SiteName = event_visit_counts.SiteName
+  DROP VIEW IF EXISTS total_visit_counts;
 
+  CREATE VIEW total_visit_counts AS
+  SELECT site.SiteName, (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
+  FROM site
+  JOIN site_visit_counts ON site.SiteName = site_visit_counts.SiteName
+  JOIN event_visit_counts ON site.SiteName = event_visit_counts.SiteName;
 
+  DROP VIEW IF EXISTS total_user_visit_counts;
 
+  CREATE VIEW total_user_visit_counts AS
+  SELECT  SiteName, VisitSiteDate as VisitDate,VisitorUsername, count(*) as num_visits
+  FROM visitsite
+  GROUP BY SiteName, VisitSiteDate, VisitorUsername
+  UNION ALL
+  SELECT  SiteName, VisitEventDate as VisitDate,VisitorUsername, count(*) as num_visits
+  FROM visitevent
+  GROUP BY SiteName, VisitEventDate, VisitorUsername;
 
- SELECT site_visit_counts.SiteName, IFNULL(site_event_counts.event_count,0), (IFNULL(site_visit_counts.site_visits,0) + IFNULL(event_visit_counts.event_visits,0)) AS total_visits
- FROM site_visit_counts
- JOIN event_visit_counts on site_visit_counts.SiteName = event_visit_counts.SiteName
- JOIN site_event_counts on site_visit_counts.SiteName = site_event_counts.SiteName
- WHERE
-  CASE WHEN SName IS NULL
-  THEN site_visit_counts.SiteName = site_visit_counts.SiteName
-  ELSE site_visit_counts.SiteName = SName END
-  AND CASE WHEN include_visited = 'No'
-  THEN CONCAT site_event_counts.SiteName NOT IN (
-    SELECT visitsite.SiteName
+  SELECT site.SiteName, IFNULL(site_event_counts.event_count,0) as num_events, IFNULL(total_visit_counts.total_visits,0) as total_visits, sum(num_visits) as user_visits
+  FROM site
+  JOIN total_visit_counts on site.SiteName = total_visit_counts.SiteName
+  JOIN site_event_counts on site.SiteName = site_event_counts.SiteName
+  JOIN total_user_visit_counts on site.SiteName = total_user_visit_counts.SiteName
+  WHERE
+  total_user_visit_counts.VisitorUsername = UName
+  AND total_user_visit_counts.VisitDate BETWEEN SDate AND EDate
+  GROUP BY site.SiteName
+   HAVING site.SiteName IN
+  (
+    SELECT DISTINCT site.SiteName
+    FROM site
+    JOIN total_visit_counts on site.SiteName = total_visit_counts.SiteName
+    JOIN site_event_counts on site.SiteName = site_event_counts.SiteName
+    JOIN total_user_visit_counts on site.SiteName = total_user_visit_counts.SiteName
+    WHERE
+    CASE WHEN SName IS NULL
+    THEN site.SiteName = site.SiteName
+    ELSE site.SiteName = SName END
+    AND CASE WHEN include_visited = 'No'
+    THEN site.SiteName NOT IN (
+    SELECT DISTINCT visitsite.SiteName
     FROM visitsite WHERE VisitorUsername = UName)
-  ELSE visitsite.SiteName = visitsite.SiteName END
-  AND IFNULL(site_event_counts.event_count,0) BETWEEN ECrangeL AND ECrangeU;
- END //
-DELIMITER ;
+    ELSE site.SiteName = site.SiteName END
+    AND IFNULL(total_visit_counts.total_visits,0) BETWEEN VrangeL AND VrangeU
+    AND IFNULL(site_event_counts.event_count,0) BETWEEN ECrangeL AND ECrangeU);
+   END //
+  DELIMITER ;
 
 #DELIMITER //
 #CREATE PROCEDURE SelectSite(IN OpenErrday ENUM('Yes','No'), )
