@@ -449,7 +449,15 @@ DELIMITER;
 
 /* Screen 24 - Administrator Create Transit */
 #get connected sites
-
+DELIMITER //
+CREATE PROCEDURE s24_get_conn_sites(IN
+TType ENUM('MARTA', 'Bus', 'Bike'),
+TRRoute VARCHAR(20))
+BEGIN
+SELECT DISTINCT SiteName from connect
+WHERE connect.TransitType = TType AND connect.TransitRoute = TRoute;
+END //
+DELIMITER ;
 
 /* Page 24 Create Transit */
 DELIMITER //
